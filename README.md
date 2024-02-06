@@ -20,6 +20,15 @@ L'objectif sera de réaliser une interface de visualisations des notations pour 
    - Initialiser un projet Node.js avec Express.
    - Configurer le serveur pour recevoir des requêtes HTTP.
 
+Pour build le projet :
+
+>`npm ci`
+>`npm run build:dev`
+
+Pour start le projet :
+
+>`npm run start:dev`
+
 ### Étape 2: Conception de la Base de Données
 
 4. **Modélisation de la Base de Données**
