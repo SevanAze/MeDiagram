@@ -15,8 +15,13 @@ module.exports = {
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
+  devServer: {
+    magicHtml: true,
+    historyApiFallback: true,
+  },
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname, "public"),
+    publicPath: '/dist/',
   },
 };
