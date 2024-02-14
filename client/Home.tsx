@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import ResponsiveAppBar from './components/ResponsiveAppBar';
+import React from 'react';
 import { useAuth } from './AuthContext';
-import SignInModal from './SignInModal';
+import ResponsiveAppBar from './components/ResponsiveAppBar';
 // Importez d'autres composants de page ici
 
 function Home() {

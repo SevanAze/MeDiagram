@@ -1,24 +1,28 @@
-import * as React from "react";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useState } from "react";
 import Dialog from "@mui/material/Dialog";
+import Grid from "@mui/material/Grid";
+import Link from "@mui/material/Link";
+import { createTheme, styled, ThemeProvider } from "@mui/material/styles";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import * as React from "react";
 
 type SignInModalProps = {
   open: boolean;
   handleClose: () => void;
 };
+
+const CustomButton = styled(Button)({
+  backgroundColor: 'black', // Couleur de fond initiale
+  color: 'white', // Couleur du texte initial
+  '&:hover': {
+    backgroundColor: 'grey', // Couleur de fond au survol
+    // La couleur du texte reste blanche, donc pas besoin de la redéfinir
+  },
+});
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -62,14 +66,9 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
           sx={{ padding: 6 }}
         >
           <Grid item>
-            <Avatar sx={{ bgcolor: "secondary.main" }}>
+            <Avatar sx={{ bgcolor: "black" }}>
               <LockOutlinedIcon />
             </Avatar>
-          </Grid>
-          <Grid item>
-            <Typography component="h1" variant="h5">
-              Sign in
-            </Typography>
           </Grid>
           <Grid
             item
@@ -88,7 +87,26 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
                 name="email"
                 autoComplete="email"
                 autoFocus
-                sx={{ width: "100%", mb: 2, color: "white", backgroundColor: "black" }} // Applique seulement la couleur du texte en blanc
+                sx={{
+                  width: "100%", mb: 2,
+                  '.MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'white', // Définit la couleur initiale de la bordure
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'white', // Maintient la couleur de la bordure au survol
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'white', // Bordure en blanc lors du focus
+                    },
+                  },
+                  '.MuiInputLabel-root': { // Couleur du label
+                    color: 'white',
+                  },
+                  '.MuiInputBase-input': { // Couleur du texte tapé
+                    color: 'white',
+                  },
+                }} // Applique seulement la couleur du texte en blanc
                 InputLabelProps={{
                   style: { color: "white" }, // Couleur du label en blanc
                 }}
@@ -106,7 +124,26 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                sx={{ width: "100%", mb: 2, color: "white" }} // Applique seulement la couleur du texte en blanc
+                sx={{
+                  width: "100%", mb: 2,
+                  '.MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'white', // Définit la couleur initiale de la bordure
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'white', // Maintient la couleur de la bordure au survol
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'white', // Bordure en blanc lors du focus
+                    },
+                  },
+                  '.MuiInputLabel-root': { // Couleur du label
+                    color: 'white',
+                  },
+                  '.MuiInputBase-input': { // Couleur du texte tapé
+                    color: 'white',
+                  },
+                }} // Applique seulement la couleur du texte en blanc
                 InputLabelProps={{
                   style: { color: "white" }, // Couleur du label en blanc
                 }}
@@ -116,36 +153,25 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
               />
             </Grid>
             <Grid item>
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-            </Grid>
-            <Grid item>
-              <Button type="submit" variant="contained">
+              <CustomButton type="submit" variant="contained">
                 Sign In
-              </Button>
-            </Grid>
-            <Grid
-              item
-              container
-              justifyContent="space-between"
-              sx={{ width: "75%" }}
-            >
-              <Grid item>
-                <Link href="#" variant="body2">
-                  Forgot password
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
-              </Grid>
+              </CustomButton>
+          </Grid>
+          <Grid
+            item
+            container
+            justifyContent="space-between"
+            sx={{ width: "100%" }}
+          >
+            <Grid item>
+              <Link href="#" variant="body2" sx={{ color: "powderblue" }}>
+                {"Don't have an account ? Sign Up !"}
+              </Link>
             </Grid>
           </Grid>
         </Grid>
-      </Dialog>
-    </ThemeProvider>
+      </Grid>
+    </Dialog>
+    </ThemeProvider >
   );
 }
