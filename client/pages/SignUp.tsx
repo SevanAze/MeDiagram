@@ -82,7 +82,7 @@ export default function SignUp() {
                     alignItems="center"
                     justifyContent="center"
                     spacing={2}
-                    sx={{ padding: 6 }}
+                    sx={{ padding: 6, minHeight: '100vh' }}
                 >
 
                     <Grid container direction="row" alignItems="center" justifyContent="center" spacing={2}>
@@ -140,11 +140,6 @@ export default function SignUp() {
                         >
                             Sign Up
                         </CustomButton>
-                        <Grid item >
-                            <Link href="#" variant="body2" style={{ color: 'white' }}>
-                                Already have an account? Sign in
-                            </Link>
-                        </Grid>
                     </Box>
                 </Grid>
             </Container>
