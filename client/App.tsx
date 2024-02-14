@@ -1,18 +1,20 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { AuthProvider } from "./AuthContext";
 import Home from "./Home";
-import SignIn from "./SignIn";
+import SignInModal from "./SignInModal";
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/signin" element={<SignIn />} />
-        </Routes>
-      </Suspense>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+          </Routes>
+        </Suspense>
+      </Router>
+    </AuthProvider>
   );
 };
 

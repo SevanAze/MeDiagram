@@ -1,11 +1,15 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
+import authRouter from "./routes/authRouter";
+import { AppDataSource } from "../data-source";
 
+require('dotenv').config();
 const app = express();
 
-app.use(express.static(path.join(__dirname, "../../public")));
 
-console.log(__dirname)
+app.use(express.static(path.join(__dirname, "../../public")));
+app.use(authRouter);
+AppDataSource.initialize().catch((error) => console.error('Error during Data Source initialization', error));
 
 app.get("/*", (req: Request, res: Response, next: NextFunction): void => {
   try {
