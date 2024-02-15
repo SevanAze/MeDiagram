@@ -8,7 +8,9 @@ const app = express();
 
 
 app.use(express.static(path.join(__dirname, "../../public")));
+app.use(express.json());
 app.use(authRouter);
+
 AppDataSource.initialize().catch((error) => console.error('Error during Data Source initialization', error));
 
 app.get("/*", (req: Request, res: Response, next: NextFunction): void => {

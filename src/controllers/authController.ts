@@ -5,20 +5,27 @@ import { User } from "../entity/User.entity";
 import { AppDataSource } from "../../data-source";
 
 const registerUser = async (req: Request, res: Response) => {
+
+  console.log('TEST')
+
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
+
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const userRepository = AppDataSource.getRepository(User);
+
     const newUser = userRepository.create({
-      username,
+      username: username,
+      email: email,
       password: hashedPassword,
-    });
+    })
+
     await userRepository.save(newUser);
 
     res.status(201).send("User registered");
   } catch (error) {
-    res.status(500).send("Server error");
+    res.status(500).send("Server error" + error.message);
   }
 };
 

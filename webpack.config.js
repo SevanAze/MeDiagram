@@ -1,4 +1,6 @@
 const path = require("path");
+const dotenv = require('dotenv').config();
+const webpack = require('webpack');
 
 module.exports = {
   entry: "./client/index.tsx",
@@ -24,4 +26,9 @@ module.exports = {
     path: path.resolve(__dirname, "public"),
     publicPath: '/dist/',
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify(dotenv.parsed)
+    }),
+  ], 
 };

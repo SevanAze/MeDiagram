@@ -5,10 +5,10 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
 import Grid from '@mui/material/Grid';
-import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
+import axios from 'axios';
 import * as React from 'react';
 
 // Personnalisation du bouton
@@ -63,13 +63,26 @@ const defaultTheme = createTheme({
 });
 
 export default function SignUp() {
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+
+    const handleSubmit = async (event: any) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
+
+        // Récupération des valeurs depuis le formulaire
+        const username = data.get('username');
+        const email = data.get('email'); // Assurez-vous que votre backend gère cet attribut si nécessaire
+        const password = data.get('password');
+
+        try {
+            // Appel à votre API pour enregistrer l'utilisateur
+            await axios.post(`${process.env.BACKEND_URL}/register`, { username, email, password });
+            
+            console.log("User registered successfully");
+            // Redirection ou gestion de l'état après l'inscription réussie
+        } catch (error) {
+            console.error("Error registering user", error);
+            // Gérer l'erreur ici, par exemple afficher un message à l'utilisateur
+        }
     };
 
     return (
@@ -102,7 +115,7 @@ export default function SignUp() {
                             <Grid item xs={15}>
                                 <TextField
                                     autoComplete="username"
-                                    name="Username"
+                                    name="username"
                                     required
                                     fullWidth
                                     id="Username"

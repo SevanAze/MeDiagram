@@ -24,9 +24,6 @@ const CustomButton = styled(Button)({
   },
 });
 
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
-
 export default function SignInModal({ open, handleClose }: SignInModalProps) {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -38,7 +35,6 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
       <Dialog
         open={open}
         onClose={handleClose}
@@ -66,7 +62,7 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
           sx={{ padding: 6 }}
         >
           <Grid item>
-            <Avatar sx={{ bgcolor: "black" }}>
+            <Avatar sx={{ color: "white",bgcolor: "black" }}>
               <LockOutlinedIcon />
             </Avatar>
           </Grid>
@@ -164,7 +160,7 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
             sx={{ width: "100%" }}
           >
             <Grid item>
-              <Link href="#" variant="body2" sx={{ color: "powderblue" }}>
+              <Link href="/signup" variant="body2" sx={{ color: "powderblue" }}>
                 {"Don't have an account ? Sign Up !"}
               </Link>
             </Grid>
@@ -172,6 +168,5 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
         </Grid>
       </Grid>
     </Dialog>
-    </ThemeProvider >
   );
 }
