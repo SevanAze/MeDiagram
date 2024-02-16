@@ -1,14 +1,16 @@
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { Alert, Box } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import Dialog from "@mui/material/Dialog";
 import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
-import { createTheme, styled, ThemeProvider } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import axios from "axios";
 import * as React from "react";
+import { useState } from "react";
 
 type SignInModalProps = {
   open: boolean;
@@ -16,101 +18,135 @@ type SignInModalProps = {
 };
 
 const CustomButton = styled(Button)({
-  backgroundColor: 'black', // Couleur de fond initiale
-  color: 'white', // Couleur du texte initial
-  '&:hover': {
-    backgroundColor: 'grey', // Couleur de fond au survol
+  backgroundColor: "black", // Couleur de fond initiale
+  color: "white", // Couleur du texte initial
+  "&:hover": {
+    backgroundColor: "grey", // Couleur de fond au survol
     // La couleur du texte reste blanche, donc pas besoin de la redéfinir
   },
 });
 
 export default function SignInModal({ open, handleClose }: SignInModalProps) {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [error, setError] = useState(""); // To display error messages
+
+  const handleSubmit = async (event: any) => {
     event.preventDefault();
+
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    console.log(data)
+    const email = data.get("email");
+    const password = data.get("password");
+
+    try {
+      const response = await axios.post(`${process.env.BACKEND_URL}/login`, {
+        email,
+        password,
+      });
+
+      const token = response.data.token;
+
+      if (response.status === 200 && token !== "") {
+        // Store the token securely (e.g., using localStorage or encrypted cookies)
+        localStorage.setItem("authToken", token);
+        // Redirect to the protected or authenticated area
+        window.location.href = "/"; // Or your desired route
+      } else {
+        setError("Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      // Handle network errors or other unexpected issues
+      setError("An error occurred. Please try again later.");
+    }
   };
 
   return (
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        PaperProps={{
-          sx: {
-            borderRadius: "12px", // Arrondit les bords avec une valeur de 12px
-            width: "25%", // Agrandit la largeur de la modal à 25% de la largeur de l'écran
-            height: "auto", // Ajuste la hauteur automatiquement en fonction du contenu
-            maxWidth: "none", // Supprime la limite de largeur maximale si nécessaire
-            bgcolor: "black", // Fond noir
-            color: "white", // Texte en blanc
-            borderColor: "white", // Contours en blanc
-            borderWidth: 2,
-            borderStyle: "solid",
-          },
-        }}
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      PaperProps={{
+        sx: {
+          borderRadius: "12px", // Arrondit les bords avec une valeur de 12px
+          width: "25%", // Agrandit la largeur de la modal à 25% de la largeur de l'écran
+          height: "auto", // Ajuste la hauteur automatiquement en fonction du contenu
+          maxWidth: "none", // Supprime la limite de largeur maximale si nécessaire
+          bgcolor: "black", // Fond noir
+          color: "white", // Texte en blanc
+          borderColor: "white", // Contours en blanc
+          borderWidth: 2,
+          borderStyle: "solid",
+        },
+      }}
+    >
+      <CssBaseline />
+      <Grid
+        container
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        spacing={2}
+        sx={{ padding: 6 }}
       >
-        <CssBaseline />
+        <Grid item>
+          <Avatar sx={{ color: "white", bgcolor: "black" }}>
+            <LockOutlinedIcon />
+          </Avatar>
+        </Grid>
+        <Grid item>{error && <Alert severity="error">{error}</Alert>}</Grid>
         <Grid
+          item
           container
+          spacing={2}
           direction="column"
           alignItems="center"
-          justifyContent="center"
-          spacing={2}
-          sx={{ padding: 6 }}
+          sx={{ width: "auto" }}
         >
-          <Grid item>
-            <Avatar sx={{ color: "white",bgcolor: "black" }}>
-              <LockOutlinedIcon />
-            </Avatar>
-          </Grid>
-          <Grid
-            item
-            container
-            spacing={2}
-            direction="column"
-            alignItems="center"
-            sx={{ width: "auto" }}
+          <Box
+            component="form"
+            justifyContent={"center"}
+            noValidate
+            onSubmit={handleSubmit}
           >
-            <Grid item>
-              <TextField
-                margin="normal"
-                required
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
-                sx={{
-                  width: "100%", mb: 2,
-                  '.MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'white', // Définit la couleur initiale de la bordure
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'white', // Maintient la couleur de la bordure au survol
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'white', // Bordure en blanc lors du focus
-                    },
+          <Grid item>
+            <TextField
+              margin="normal"
+              required
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              sx={{
+                width: "100%",
+                mb: 2,
+                ".MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "white", // Définit la couleur initiale de la bordure
                   },
-                  '.MuiInputLabel-root': { // Couleur du label
-                    color: 'white',
+                  "&:hover fieldset": {
+                    borderColor: "white", // Maintient la couleur de la bordure au survol
                   },
-                  '.MuiInputBase-input': { // Couleur du texte tapé
-                    color: 'white',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "white", // Bordure en blanc lors du focus
                   },
-                }} // Applique seulement la couleur du texte en blanc
-                InputLabelProps={{
-                  style: { color: "white" }, // Couleur du label en blanc
-                }}
-                InputProps={{
-                  style: { color: "white", backgroundColor: "black" }, // Couleur du texte tapé en blanc
-                }}
-              />
-            </Grid>
+                },
+                ".MuiInputLabel-root": {
+                  // Couleur du label
+                  color: "white",
+                },
+                ".MuiInputBase-input": {
+                  // Couleur du texte tapé
+                  color: "white",
+                },
+              }} // Applique seulement la couleur du texte en blanc
+              InputLabelProps={{
+                style: { color: "white" }, // Couleur du label en blanc
+              }}
+              InputProps={{
+                style: { color: "white", backgroundColor: "black" }, // Couleur du texte tapé en blanc
+              }}
+            />
+          </Grid>
+          
             <Grid item>
               <TextField
                 margin="normal"
@@ -121,23 +157,26 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
                 id="password"
                 autoComplete="current-password"
                 sx={{
-                  width: "100%", mb: 2,
-                  '.MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'white', // Définit la couleur initiale de la bordure
+                  width: "100%",
+                  mb: 2,
+                  ".MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "white", // Définit la couleur initiale de la bordure
                     },
-                    '&:hover fieldset': {
-                      borderColor: 'white', // Maintient la couleur de la bordure au survol
+                    "&:hover fieldset": {
+                      borderColor: "white", // Maintient la couleur de la bordure au survol
                     },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'white', // Bordure en blanc lors du focus
+                    "&.Mui-focused fieldset": {
+                      borderColor: "white", // Bordure en blanc lors du focus
                     },
                   },
-                  '.MuiInputLabel-root': { // Couleur du label
-                    color: 'white',
+                  ".MuiInputLabel-root": {
+                    // Couleur du label
+                    color: "white",
                   },
-                  '.MuiInputBase-input': { // Couleur du texte tapé
-                    color: 'white',
+                  ".MuiInputBase-input": {
+                    // Couleur du texte tapé
+                    color: "white",
                   },
                 }} // Applique seulement la couleur du texte en blanc
                 InputLabelProps={{
@@ -149,10 +188,14 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
               />
             </Grid>
             <Grid item>
-              <CustomButton type="submit" variant="contained">
+              <CustomButton
+                type="submit"
+                variant="contained"
+              >
                 Sign In
               </CustomButton>
-          </Grid>
+            </Grid>
+          </Box>
           <Grid
             item
             container
