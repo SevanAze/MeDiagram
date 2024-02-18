@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.7",
     "@mui/material": "^5.15.7",
+    "@mui/x-charts": "^6.19.4",
     "axios": "^1.6.7",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.4",

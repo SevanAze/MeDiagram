@@ -1,7 +1,11 @@
 import express from "express";
 import {
+    computeComments,
+    deleteRating,
   getAverageRating,
   getMediaByType,
+  getRatingsBySeason,
+  getSeasonsByWorkId,
   getSpecificRating,
   hasUserRated,
   modifyRating,
@@ -16,5 +20,13 @@ routerMedia.post("/submitRating", submitRating);
 routerMedia.get("/hasUserRated", hasUserRated);
 routerMedia.get("/getSpecificRating", getSpecificRating);
 routerMedia.post("/modifyRating", modifyRating);
+routerMedia.post("/deleteRating", deleteRating);
+routerMedia.get("/computeComments", computeComments);
+routerMedia.get("/getSeasonsByWorkId", getSeasonsByWorkId);
+routerMedia.get("/getRatingsBySeason", getRatingsBySeason);
+
+
+
+
 
 export default routerMedia;

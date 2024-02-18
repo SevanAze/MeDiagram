@@ -2,6 +2,7 @@ import {
   Alert,
   Box,
   Button,
+  Grid,
   Modal,
   TextField,
   Typography,
@@ -17,8 +18,8 @@ interface RatingModalProps {
   userHasRated: boolean;
   setComment: React.Dispatch<React.SetStateAction<string>>;
   setUserRating: React.Dispatch<React.SetStateAction<string>>;
-  comment: string,
-  userRating: string,
+  comment: string;
+  userRating: string;
 }
 
 const style = {
@@ -47,6 +48,8 @@ const RatingWorkModal: React.FC<RatingModalProps> = ({
   userRating,
 }) => {
   const [error, setError] = useState<string>("");
+
+  console.log("workId", workId);
 
   const validateRating = (rating: string): boolean => {
     const numRating = parseInt(rating, 10);
@@ -92,6 +95,26 @@ const RatingWorkModal: React.FC<RatingModalProps> = ({
     } catch (error) {
       console.error("Error submitting or updating rating:", error);
       setError("Failed to submit or update rating");
+    }
+  };
+
+  // Définir la fonction handleDeleteRating
+  const handleDeleteRating = async () => {
+    try {
+      const response = await axios.post("/deleteRating", {
+        userId: userId,
+        workId: workId,
+      });
+
+      if (response.status === 200) {
+        onClose(); // Fermer la modal après la suppression réussie
+        // Optionnellement, rafraîchir les données affichées, comme la moyenne des ratings
+      } else {
+        throw new Error("Failed to delete rating");
+      }
+    } catch (error) {
+      console.error("Error deleting rating:", error);
+      setError("Failed to delete rating");
     }
   };
 
@@ -149,19 +172,41 @@ const RatingWorkModal: React.FC<RatingModalProps> = ({
             },
           }}
         />
-
-        <Button
-          onClick={handleSubmitRating}
-          disabled={userRating === "" || error !== ""}
-          sx={{
-            mt: 2,
-            bgcolor: "white",
-            color: "black",
-            "&:hover": { bgcolor: "grey.300" },
-          }}
-        >
-          Submit
-        </Button>
+        <Grid container alignItems="center" spacing={1}>
+          <Grid item>
+            <Button
+              onClick={handleSubmitRating}
+              disabled={userRating === "" || error !== ""}
+              sx={{
+                mt: 2,
+                bgcolor: "white",
+                color: "black",
+                "&:hover": { bgcolor: "grey.300" },
+              }}
+            >
+              Submit
+            </Button>
+          </Grid>
+          {userHasRated && (
+            <Grid item>
+              <Box ml={2}>
+                {" "}
+                {/* Ajoutez un espace à gauche */}
+                <Button
+                  onClick={handleDeleteRating}
+                  sx={{
+                    mt: 2,
+                    bgcolor: "white",
+                    color: "black",
+                    "&:hover": { bgcolor: "red" },
+                  }}
+                >
+                  Delete Rating
+                </Button>
+              </Box>
+            </Grid>
+          )}
+        </Grid>
       </Box>
     </Modal>
   );

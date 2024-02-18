@@ -66,13 +66,17 @@ const getAverageRating = async (req: Request, res: Response) => {
       : "Not rated yet";
     const ratingsCount = result.count ? parseInt(result.count, 10) : 0;
 
-    res.json({ targetId: numericTargetId, targetType, averageRating, ratingsCount });
+    res.json({
+      targetId: numericTargetId,
+      targetType,
+      averageRating,
+      ratingsCount,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error." });
   }
 };
-
 
 const submitRating = async (req: Request, res: Response) => {
   const { targetId, targetType, rating, comment, userId } = req.body;
@@ -93,16 +97,23 @@ const submitRating = async (req: Request, res: Response) => {
   try {
     const ratingRepository = AppDataSource.getRepository(Rating);
 
-    // Vérifier si une note existe déjà pour cet utilisateur et ce targetId
-    const existingRating = await ratingRepository.findOne({
-      where: [
-        { work_id: targetType === "work" ? targetId : null, user_id: userId },
-        {
-          component_id: targetType === "component" ? targetId : null,
-          user_id: userId,
-        },
-      ],
-    });
+    let existingRating;
+
+    if (targetType === "work") {
+      existingRating = await ratingRepository.findOne({
+        where: { work_id: targetId, user_id: userId },
+      });
+    } else if (targetType === "component") {
+      existingRating = await ratingRepository.findOne({
+        where: { component_id: targetId, user_id: userId },
+      });
+    }
+
+    if (existingRating) {
+      return res.status(403).json({
+        message: "User has already submitted a rating for this target.",
+      });
+    }
 
     if (existingRating) {
       return res.status(403).json({
@@ -224,6 +235,118 @@ const modifyRating = async (req: Request, res: Response) => {
   }
 };
 
+const deleteRating = async (req: Request, res: Response) => {
+  const { userId, workId } = req.body;
+
+  try {
+    // Supposer que chaque utilisateur ne peut laisser qu'un seul rating par œuvre
+    const ratingRepository = AppDataSource.getRepository(Rating);
+    const result = await ratingRepository.delete({
+      user_id: parseInt(userId),
+      work_id: parseInt(workId),
+    });
+
+    if (result.affected && result.affected > 0) {
+      res.status(200).json({ message: "Rating deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Rating not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting rating:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Fonction pour récupérer les ratings par workId
+const computeComments = async (req: Request, res: Response) => {
+  const workId = parseInt(req.query.workId as string);
+  const page = parseInt(req.query.page as string) || 1;
+  const ratingsPerPage = 10;
+
+  try {
+    // Compter le nombre total de ratings
+    const totalRatings = await AppDataSource.getRepository(Rating).count({
+      where: { work_id: workId },
+    });
+
+    // Calculer le nombre total de pages
+    const totalPages = Math.ceil(totalRatings / ratingsPerPage);
+
+    const ratings = await AppDataSource.getRepository(Rating)
+      .createQueryBuilder("rating")
+      .leftJoinAndSelect("rating.user", "user") // Assurez-vous que la relation dans Rating est définie pour pointer vers User
+      .where("rating.work_id = :workId", { workId })
+      .take(ratingsPerPage)
+      .skip((page - 1) * ratingsPerPage)
+      .orderBy("rating.date", "DESC")
+      .getMany();
+
+    // Préparer les données pour la réponse
+    const response = {
+      comments: ratings.map((rating) => ({
+        id: rating.id,
+        comment: rating.comment,
+        rating: rating.rating,
+        date: rating.date.toISOString().split("T")[0], // Format de date "YYYY-MM-DD"
+        userName: rating.user.username, // Ou tout autre champ représentant le nom de l'utilisateur
+      })),
+      totalPages,
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Error fetching ratings by workId:", error);
+    res.status(500).json({ message: "Error fetching ratings" });
+  }
+};
+
+const getSeasonsByWorkId = async (req: Request, res: Response) => {
+  const { workId } = req.query;
+
+  try {
+    const seasons = await AppDataSource.getRepository(Component)
+      .createQueryBuilder("component")
+      .where("component.work_id = :workId", { workId }) // Correction ici
+      .andWhere("component.type = :type", { type: "saison" })
+      .getMany();
+
+    res.json(seasons);
+  } catch (error) {
+    console.error("Error fetching seasons:", error);
+    res.status(500).json({ message: "Error fetching seasons" });
+  }
+};
+
+const getRatingsBySeason = async (req: Request, res: Response) => {
+  const { seasonId } = req.query;
+  try {
+    // Utilisation de queryBuilder pour grouper par numéro d'épisode et calculer la moyenne des notes
+    const episodeRatings = await AppDataSource.getRepository(Rating)
+      .createQueryBuilder("rating")
+      .select("component.number", "episodeNumber")
+      .addSelect("AVG(rating.rating)", "averageRating")
+      .leftJoin("rating.component", "component")
+      .where("component.parent_id = :seasonId", { seasonId })
+      .andWhere("component.type = :type", { type: "episode" })
+      .groupBy("component.number")
+      .orderBy("component.number", "ASC")
+      .getRawMany();
+
+    // Transformer les résultats pour s'assurer que la moyenne des notes est un nombre flottant
+    const transformedRatings = episodeRatings.map(rating => ({
+      episodeNumber: rating.episodeNumber,
+      averageRating: parseFloat(rating.averageRating).toFixed(1),
+    }));
+
+    res.json(transformedRatings);
+  } catch (error) {
+    console.error("Error fetching episode ratings:", error);
+    res.status(500).json({ message: "Error fetching episode ratings" });
+  }
+};
+
+
+
 export {
   getAverageRating,
   getMediaByType,
@@ -231,4 +354,8 @@ export {
   submitRating,
   getSpecificRating,
   modifyRating,
+  deleteRating,
+  computeComments,
+  getSeasonsByWorkId,
+  getRatingsBySeason,
 };

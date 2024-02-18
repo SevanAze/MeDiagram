@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm";
 import { Work } from "./Work.entity";
 import { Component } from "./Component.entity";
+import { User } from "./User.entity";
 
 @Entity('rating')
 export class Rating {
@@ -26,18 +27,16 @@ export class Rating {
   @CreateDateColumn({ type: 'timestamp' })
   date!: Date;
 
-
-
-  // Relations optionnelles (non chargées par défaut)
-  // Note: Ces relations sont ici à titre d'exemple, elles ne seront pas utilisées directement dans les requêtes si vous travaillez avec targetId et targetType.
-  // Vous pouvez utiliser ces relations pour des opérations spécifiques où la connaissance du type est nécessaire et préchargée.
-  @ManyToOne(() => Work, { nullable: true })
   @JoinColumn({ name: "work_id", referencedColumnName: "id" })
   work!: Work;
 
   @ManyToOne(() => Component, { nullable: true })
   @JoinColumn({ name: "component_id", referencedColumnName: "id" })
   component!: Component;
+
+  @ManyToOne(() => User, user => user.ratings, { nullable: true })
+  @JoinColumn({ name: "user_id" })
+  user!: User;
 
   // Ajoutez ici d'autres relations si nécessaire
 }

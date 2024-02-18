@@ -14,10 +14,10 @@ import { Work } from "./Work.entity";
     id!: number;
   
     @Column()
-    workId!: number;
+    work_id!: number;
   
     @Column({ nullable: true })
-    parentId?: number;
+    parent_id?: number;
   
     @Column({
       type: "enum",
