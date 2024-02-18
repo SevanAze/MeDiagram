@@ -45,7 +45,7 @@ function ResponsiveAppBar({ isAuthenticated, logout }: ResponsiveAppBarProps) {
   const handleCloseNavMenu = (page: string) => {
     setAnchorElNav(null);
 
-    if(page === 'Search a media') navigate('/mediarate')
+    if(page === 'Rate a media') navigate('/mediarate')
   };
 
   const handleCloseUserMenu = (action: string) => {

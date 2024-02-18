@@ -33,7 +33,6 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
     event.preventDefault();
 
     const data = new FormData(event.currentTarget);
-    console.log(data)
     const email = data.get("email");
     const password = data.get("password");
 
@@ -43,11 +42,12 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
         password,
       });
 
-      const token = response.data.token;
+      const {token , userId} = response.data;
 
       if (response.status === 200 && token !== "") {
         // Store the token securely (e.g., using localStorage or encrypted cookies)
         localStorage.setItem("authToken", token);
+        localStorage.setItem("userId", userId);
         // Redirect to the protected or authenticated area
         window.location.href = "/"; // Or your desired route
       } else {

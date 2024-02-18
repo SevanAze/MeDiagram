@@ -1,11 +1,9 @@
 import {
   Autocomplete,
   Box,
-  Card,
   CardContent,
   CardMedia,
   CssBaseline,
-  Divider,
   FormControl,
   Grid,
   InputLabel,
@@ -14,16 +12,15 @@ import {
   SelectChangeEvent,
   TextField,
   ThemeProvider,
-  Typography,
+  Typography
 } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import RatingComponent from "../components/RatingComponent";
 import ResponsiveAppBar from "../components/ResponsiveAppBar";
 import { Work } from "../types/Work";
-import RatingComponent from "../components/RatingComponent";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme({
@@ -140,8 +137,6 @@ const MediaRate = () => {
     { label: "Movies", value: "movie" },
   ];
 
-  const navigate = useNavigate();
-
   const [selectedMediaType, setSelectedMediaType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Work[]>([]);
@@ -178,7 +173,7 @@ const MediaRate = () => {
     setSelectedMediaType(event.target.value);
   };
 
-  const handleSearchChange = (event: any, value) => {
+  const handleSearchChange = (event: any, value: any) => {
     setSearchQuery(value);
     // Implémenter la recherche ou filtrer les suggestions basées sur `value`
   };
@@ -189,7 +184,7 @@ const MediaRate = () => {
   ) => {
     if (value) {
       // Vérifie si une valeur est sélectionnée
-      setSelectedWork(value)
+      setSelectedWork(value);
     }
   };
 
@@ -265,33 +260,48 @@ const MediaRate = () => {
             }
             onChange={(event, value) => {
               // Vérifie si value est un objet, n'est pas null, et possède une propriété spécifique de Work (par exemple 'id')
-              if (typeof value === "object" && value !== null && 'id' in value) {
+              if (
+                typeof value === "object" &&
+                value !== null &&
+                "id" in value
+              ) {
                 handleSelect(event, value as Work); // Cast value en Work si les conditions sont remplies
               }
             }}
             ListboxProps={{
               sx: {
-                bgcolor: 'black', // Définit le fond du menu en noir
-                color: 'white', // Assure que le texte est en blanc
-                '& .MuiAutocomplete-option': {
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.12)', // Ajoute une bordure semi-transparente pour chaque option
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Couleur de fond lors du survol
+                bgcolor: "black", // Définit le fond du menu en noir
+                color: "white", // Assure que le texte est en blanc
+                "& .MuiAutocomplete-option": {
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.12)", // Ajoute une bordure semi-transparente pour chaque option
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.1)", // Couleur de fond lors du survol
                   },
                 },
-                '& .MuiAutocomplete-option:last-child': {
-                  borderBottom: 'none', // Enlève la bordure pour le dernier élément
-                }
-              }
+                "& .MuiAutocomplete-option:last-child": {
+                  borderBottom: "none", // Enlève la bordure pour le dernier élément
+                },
+              },
             }}
             renderOption={(props, option: Work) => (
-              <Box component="li" {...props} sx={{ width: 'auto', maxWidth: 900 }}> {/* Ajustez la largeur selon vos besoins */}
+              <Box
+                component="li"
+                {...props}
+                sx={{ width: "auto", maxWidth: 900 }}
+              >
+                {" "}
+                {/* Ajustez la largeur selon vos besoins */}
                 <Grid container spacing={2} alignItems="center">
                   {/* Container pour l'image */}
                   <Grid item>
                     <CardMedia
                       component="img"
-                      sx={{ width: 251, height: 150, aspectRatio: 3/2, objectFit: 'contain' }} // Ajustez la taille de l'image selon vos besoins
+                      sx={{
+                        width: 251,
+                        height: 150,
+                        aspectRatio: 3 / 2,
+                        objectFit: "contain",
+                      }} // Ajustez la taille de l'image selon vos besoins
                       image={option.mediaImage?.image_path}
                       alt={option.title}
                     />
@@ -352,7 +362,12 @@ const MediaRate = () => {
           />
         </Box>
       </Box>
-      {selectedWork && <RatingComponent work={selectedWork} />}
+      {selectedWork && (
+        <RatingComponent
+          work={selectedWork}
+          isAuthenticated={isAuthenticated}
+        />
+      )}
     </ThemeProvider>
   );
 };

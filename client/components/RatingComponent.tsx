@@ -11,19 +11,23 @@ import {
 import { Work } from "../types/Work";
 import axios from "axios";
 import AddBoxIcon from "@mui/icons-material/AddBox";
-import RatingModal from "./modals/RatingModal";
+import RatingWorkModal from "./modals/RatingWorkModal";
 
 interface RatingComponentProps {
   work: Work;
+  isAuthenticated: boolean;
 }
 
-const RatingComponent: React.FC<RatingComponentProps> = ({ work }) => {
+const RatingComponent: React.FC<RatingComponentProps> = ({ work, isAuthenticated }) => {
   const [averageWorkRating, setAverageWorkRating] = useState<string | number>(
     "Loading..."
   );
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [error, setError] = useState('');
 
-  const handleOpenModal = () => setModalOpen(true);
+  const handleOpenModal = () => {
+    if(isAuthenticated) setModalOpen(true);
+  };
   const handleCloseModal = () => setModalOpen(false);
 
   useEffect(() => {
@@ -102,7 +106,7 @@ const RatingComponent: React.FC<RatingComponentProps> = ({ work }) => {
               </Typography>
             </Grid>
             <Grid item>
-              <AddBoxIcon sx={{ color: "white", verticalAlign: "middle" }} onClick={handleOpenModal} />
+            {isAuthenticated && <AddBoxIcon sx={{ color: "white", verticalAlign: "middle" }} onClick={handleOpenModal} />}
             </Grid>
           </Grid>
         </CardContent>
@@ -136,12 +140,12 @@ const RatingComponent: React.FC<RatingComponentProps> = ({ work }) => {
           </Box>
         </Box>
       )}
-      <RatingModal
+      {<RatingWorkModal
         open={modalOpen}
-        onClose={() => handleCloseModal}
+        onClose={handleCloseModal}
         workId={parseInt(work.id)}
         //fetchAverageWorkRating={fetchAverageWorkRating}
-      />
+      />}
     </Box>
     
   );

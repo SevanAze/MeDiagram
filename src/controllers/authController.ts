@@ -38,7 +38,6 @@ const authenticateUser = async (req: Request, res: Response) => {
     const user = await userRepository.findOne({ where: { email: email } });
 
     let token = "";
-    console.log(await bcrypt.compare(password, user.password));
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(200).json({ token });
@@ -48,7 +47,7 @@ const authenticateUser = async (req: Request, res: Response) => {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ token });
+    res.status(200).json({ token, userId: user.id });
   } catch (error) {
     res.status(500).send("Server error");
   }
