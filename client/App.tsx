@@ -3,6 +3,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { AuthProvider } from "./AuthContext";
 import Home from "./Home";
 import SignUp from "./pages/SignUp";
+import MediaRate from "./pages/MediaRate";
 
 const App: React.FC = () => {
   return (
@@ -12,6 +13,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/mediarate" element={<MediaRate />} />
           </Routes>
         </Suspense>
       </Router>

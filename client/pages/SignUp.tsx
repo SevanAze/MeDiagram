@@ -19,8 +19,9 @@ import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme, styled } from "@mui/material/styles";
 import axios from "axios";
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 
 // Personnalisation du bouton
 const CustomButton = styled(Button)({
@@ -78,6 +79,16 @@ export default function SignUp() {
   const [dialogMessage, setDialogMessage] = useState("");
   const [registerStatus, setRegisterStatus] = useState(false);
 
+  const { verifyToken, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      await verifyToken();
+    };
+  
+    checkAuth();
+  }, [verifyToken]);
+
   const navigate = useNavigate();
 
   React.useEffect(() => {
@@ -95,11 +106,14 @@ export default function SignUp() {
 
     // Vérification que aucun champ n'est vide
     if (!username || !email || !password) {
-      // Ici, vous pouvez définir un état pour afficher un message d'erreur dans votre formulaire
       setDialogMessage("All fields are required !");
       setDialogOpen(true);
-      // Afficher une alerte ou une indication visuelle que tous les champs sont requis
-      // Ne pas oublier de retourner pour empêcher la suite de l'exécution si un champ est vide
+      return;
+    }
+
+    if(isAuthenticated){
+      setDialogMessage("You are already connected !");
+      setDialogOpen(true);
       return;
     }
 

@@ -19,8 +19,6 @@ function Home() {
   useEffect(() => {
     const checkAuth = async () => {
       await verifyToken();
-      // Après cette ligne, `isAuthenticated` sera mis à jour.
-      console.log(isAuthenticated); // Cela pourrait encore afficher l'ancienne valeur dans ce cycle de rendu
     };
   
     checkAuth();

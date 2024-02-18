@@ -35,7 +35,6 @@ const authenticateUser = async (req: Request, res: Response) => {
     const jwtToken: string = process.env.JWT_SECRET!;
 
     const userRepository = AppDataSource.getRepository(User);
-    console.log(email);
     const user = await userRepository.findOne({ where: { email: email } });
 
     let token = "";

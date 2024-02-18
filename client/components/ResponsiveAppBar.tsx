@@ -13,8 +13,9 @@ import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { useState } from "react";
 import SignInModal from "./modals/SignInModal";
+import { useNavigate } from "react-router-dom";
 
-const pages = ["Products", "Pricing", "Blog"];
+const pages = ["Rate a media"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 type ResponsiveAppBarProps = {
@@ -28,6 +29,8 @@ function ResponsiveAppBar({ isAuthenticated, logout }: ResponsiveAppBarProps) {
 
   const [openLoginModal, setOpenLoginModal] = useState(false); // Gérer l'ouverture de la modal
 
+  const navigate = useNavigate();
+
   const handleCloseSignIn = () => {
     setOpenLoginModal(false); // Fonction pour fermer la modal
   };
@@ -39,8 +42,10 @@ function ResponsiveAppBar({ isAuthenticated, logout }: ResponsiveAppBarProps) {
     setAnchorElUser(event.currentTarget);
   };
 
-  const handleCloseNavMenu = () => {
+  const handleCloseNavMenu = (page: string) => {
     setAnchorElNav(null);
+
+    if(page === 'Search a media') navigate('/mediarate')
   };
 
   const handleCloseUserMenu = (action: string) => {
@@ -59,7 +64,7 @@ function ResponsiveAppBar({ isAuthenticated, logout }: ResponsiveAppBarProps) {
             variant="h6"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="/"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -103,7 +108,7 @@ function ResponsiveAppBar({ isAuthenticated, logout }: ResponsiveAppBarProps) {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem key={page} onClick={() => handleCloseNavMenu(page)}>
                   <Typography textAlign="center">{page}</Typography>
                 </MenuItem>
               ))}
@@ -113,7 +118,7 @@ function ResponsiveAppBar({ isAuthenticated, logout }: ResponsiveAppBarProps) {
             {pages.map((page) => (
               <Button
                 key={page}
-                onClick={handleCloseNavMenu}
+                onClick={() => handleCloseNavMenu(page)}
                 sx={{ my: 2, color: "white", display: "block" }}
               >
                 {page}
