@@ -118,7 +118,7 @@ export default function SignUp() {
     }
 
     try {
-      await axios.post(`${process.env.BACKEND_URL}/register`, {
+      await axios.post(`/register`, {
         username,
         email,
         password,

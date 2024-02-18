@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
     try {
-      const response = await axios.post(`${process.env.BACKEND_URL}/token`, { token });
+      const response = await axios.post(`/token`, { token });
       setIsAuthenticated(response.data.isValid);
       const decodedToken = jwtDecode(token) as CustomTokenPayload;
       setUserId(parseInt(decodedToken.id))

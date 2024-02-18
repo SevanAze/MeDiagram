@@ -11,9 +11,9 @@ import {
   Select,
   SelectChangeEvent,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
-import { ThemeProvider } from '@emotion/react';
+import { ThemeProvider } from "@emotion/react";
 import { createTheme } from "@mui/material/styles";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -144,11 +144,7 @@ const MediaRate = () => {
 
   const loadWorksByType = async (type?: string): Promise<Work[]> => {
     try {
-      const response = await axios.post(
-        `${process.env.BACKEND_URL}/getmediabytype`,
-        { type }
-      );
-
+      const response = await axios.post(`/getmediabytype`, { type });
       if (response.status !== 200) {
         throw new Error("Network Error");
       }

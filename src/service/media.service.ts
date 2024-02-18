@@ -18,9 +18,8 @@ export async function getRatingByWorkIdAndUserId(userId: string, workId: string)
     return await ratingRepository.findOne({
       where: {
         user_id: parseInt(userId, 10),
-        work: { id: parseInt(workId, 10) },
+        work_id: parseInt(workId, 10),
       },
-      relations: ["work"],
     });
   }
   

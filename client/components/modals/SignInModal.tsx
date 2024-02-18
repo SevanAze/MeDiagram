@@ -36,7 +36,7 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
     const password = data.get("password");
 
     try {
-      const response = await axios.post(`${process.env.BACKEND_URL}/login`, {
+      const response = await axios.post(`/login`, {
         email,
         password,
       });

@@ -36,36 +36,33 @@ const getAverageRating = async (req: Request, res: Response) => {
   const { targetId, targetType } = req.body;
 
   try {
-    // Initialisation du query builder
-    const queryBuilder =
-      AppDataSource.getRepository(Rating).createQueryBuilder("rating");
+    let queryBuilder = AppDataSource.getRepository(Rating).createQueryBuilder("rating");
 
-    // Convertir targetId en nombre
+    // Convertir targetId en nombre pour éviter les erreurs de type.
     const numericTargetId = parseInt(targetId, 10);
 
+    // Appliquer le filtre en fonction du targetType.
     if (targetType === "work") {
-      queryBuilder.where("rating.work_id = :targetId", {
-        targetId: numericTargetId,
-      });
-    } else if (targetType === "component") {
-      queryBuilder.where("rating.component_id = :targetId", {
-        targetId: numericTargetId,
-      });
+      // Sélectionner uniquement les ratings directement liés au work (sans composants).
+      queryBuilder = queryBuilder
+        .where("rating.work_id = :targetId", { targetId: numericTargetId })
+        .andWhere("rating.component_id IS NULL");
     } else {
-      return res.status(400).json({ message: "Invalid target type" });
+      // La logique pour "component" reste inchangée.
+      queryBuilder = queryBuilder
+        .where("rating.component_id = :targetId", { targetId: numericTargetId });
     }
 
-    // Calculer la moyenne et compter le nombre de ratings
+    // Exécuter la requête pour calculer la moyenne et le nombre de ratings.
     const result = await queryBuilder
       .select("AVG(rating.rating)", "average")
       .addSelect("COUNT(rating.id)", "count")
       .getRawOne();
 
-    const averageRating = result.average
-      ? parseFloat(result.average)
-      : "Not rated yet";
-    const ratingsCount = result.count ? parseInt(result.count, 10) : 0;
+    const averageRating = result.average ? parseFloat(result.average).toFixed(1) : "Not rated yet";
+    const ratingsCount = parseInt(result.count, 10);
 
+    // Envoyer le résultat.
     res.json({
       targetId: numericTargetId,
       targetType,
@@ -74,9 +71,10 @@ const getAverageRating = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Internal server error." });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
+
 
 const submitRating = async (req: Request, res: Response) => {
   const { targetId, targetType, rating, comment, userId } = req.body;
@@ -265,9 +263,13 @@ const computeComments = async (req: Request, res: Response) => {
 
   try {
     // Compter le nombre total de ratings
-    const totalRatings = await AppDataSource.getRepository(Rating).count({
-      where: { work_id: workId },
-    });
+    const totalRatings = await AppDataSource
+    .getRepository(Rating)
+    .createQueryBuilder("rating")
+    .where("rating.work_id = :workId", { workId })
+    .andWhere("rating.component_id IS NULL")
+    .getCount();
+
 
     // Calculer le nombre total de pages
     const totalPages = Math.ceil(totalRatings / ratingsPerPage);
@@ -276,6 +278,7 @@ const computeComments = async (req: Request, res: Response) => {
       .createQueryBuilder("rating")
       .leftJoinAndSelect("rating.user", "user") // Assurez-vous que la relation dans Rating est définie pour pointer vers User
       .where("rating.work_id = :workId", { workId })
+      .andWhere("rating.component_id IS NULL")
       .take(ratingsPerPage)
       .skip((page - 1) * ratingsPerPage)
       .orderBy("rating.date", "DESC")

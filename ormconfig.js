@@ -2,7 +2,7 @@
 module.exports = {
     "type": "mariadb",
     "host": "localhost",
-    "port": parseInt(process.env.DB_PORT, 10) || 3306,
+    "port": 3306,
     "username": "root",
     "password": "bar",
     "database": "mediagram_db",
