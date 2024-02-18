@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 import {
   Box,
   Card,
@@ -8,39 +8,53 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
-import { Work } from "../types/Work";
 import axios from "axios";
-import AddBoxIcon from "@mui/icons-material/AddBox";
+import React, { useEffect, useState } from "react";
+import { Work } from "../types/Work";
 import RatingWorkModal from "./modals/RatingWorkModal";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
 
 interface RatingComponentProps {
   work: Work;
   isAuthenticated: boolean;
+  userId?: number;
 }
 
-const RatingComponent: React.FC<RatingComponentProps> = ({ work, isAuthenticated }) => {
+const RatingComponent: React.FC<RatingComponentProps> = ({
+  work,
+  isAuthenticated,
+  userId,
+}) => {
   const [averageWorkRating, setAverageWorkRating] = useState<string | number>(
     "Loading..."
   );
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [error, setError] = useState('');
+  const [ratesCount, setRatesCount] = useState<number>();
+  const [ratingModalOpen, setRatingModalOpen] = useState<boolean>(false);
+  const [userHasRated, setUserHasRated] = useState(false);
+  const [error, setError] = useState("");
+
+  const [userRating, setUserRating] = useState<string>("");
+  const [comment, setComment] = useState<string>("");
 
   const handleOpenModal = () => {
-    if(isAuthenticated) setModalOpen(true);
+    if (isAuthenticated) setRatingModalOpen(true);
   };
-  const handleCloseModal = () => setModalOpen(false);
+  const handleCloseModal = () => {
+    setRatingModalOpen(false);
+  };
 
   useEffect(() => {
     const fetchAverageWorkRating = async () => {
       try {
-        const response = await axios.post(
-          `${process.env.BACKEND_URL}/getrating`,
-          { targetId: work.id, targetType: "work" }
-        );
+        const response = await axios.post(`/getrating`, {
+          targetId: work.id,
+          targetType: "work",
+        });
 
         setAverageWorkRating(
           response.data.averageRating.toFixed(1) || "Not rated yet"
         );
+        setRatesCount(response.data.ratingsCount);
       } catch (error) {
         console.error("Error fetching average rating:", error);
         setAverageWorkRating("Error loading rating");
@@ -48,7 +62,40 @@ const RatingComponent: React.FC<RatingComponentProps> = ({ work, isAuthenticated
     };
 
     fetchAverageWorkRating();
-  }, [work]);
+  }, [work, ratingModalOpen]);
+
+  useEffect(() => {
+    if (isAuthenticated && userId) {
+      axios
+        .get(`/hasUserRated?userId=${userId}&workId=${work.id}`)
+        .then((response) => {
+          setUserHasRated(response.data.hasRated);
+        })
+        .catch((error) => {
+          console.error("Error checking user rating:", error);
+        });
+    }
+  }, [work, userId, isAuthenticated]);
+
+  useEffect(() => {
+    if(userHasRated){
+    const fetchUserRating = async () => {
+      if (!userId || !work.id || !open) return;
+
+      try {
+        const response = await axios.get(`/getSpecificRating?userId=${userId}&workId=${work.id}`);
+        if (response.data) {
+          setUserRating(response.data.rating.toString());
+          setComment(response.data.comment || "");
+        }
+      } catch (error) {
+        console.error("Error fetching user rating:", error);
+        setError("Failed to fetch rating");
+      }
+    };
+    fetchUserRating();
+  }
+  }, [userId, work.id, open, userHasRated]);
 
   return (
     <Box
@@ -102,13 +149,57 @@ const RatingComponent: React.FC<RatingComponentProps> = ({ work, isAuthenticated
                 <span style={{ fontWeight: "bold", fontSize: 15 }}>
                   Rating :
                 </span>{" "}
-                {averageWorkRating + " / 10"}
+                {averageWorkRating + " / 10"}{" "}
               </Typography>
             </Grid>
             <Grid item>
-            {isAuthenticated && <AddBoxIcon sx={{ color: "white", verticalAlign: "middle" }} onClick={handleOpenModal} />}
+              <Typography variant="body2" sx={{ color: "white" }}>
+                <span style={{ fontWeight: "bold", fontSize: 15 }}>
+                  Rates :
+                </span>{" "}
+                {ratesCount}
+              </Typography>
             </Grid>
           </Grid>
+          {isAuthenticated && !userHasRated && (
+            <Grid container alignItems="center" spacing={1}>
+              <Grid item>
+                <Typography
+                  onClick={handleOpenModal}
+                  variant="body2"
+                  sx={{ color: "white" }}
+                >
+                  {"Add your rating "}
+                </Typography>
+              </Grid>
+              <Grid item>
+                <AddBoxIcon
+                  sx={{ color: "white", verticalAlign: "middle" }}
+                  onClick={handleOpenModal}
+                />
+              </Grid>
+            </Grid>
+          )}
+          {isAuthenticated && userHasRated && <Grid container alignItems="center" spacing={1}>
+            <Grid item>
+              <Typography
+                onClick={handleOpenModal}
+                variant="body2"
+                sx={{ color: "white" }}
+              >
+                {"Your rating : "}
+                {userRating + " / 10"}{" "}
+              </Typography>
+            </Grid>
+            <Grid item>
+              {isAuthenticated && userHasRated && (
+                <BorderColorIcon
+                  sx={{ color: "white", verticalAlign: "middle" }}
+                  onClick={handleOpenModal}
+                />
+              )}
+            </Grid>
+          </Grid>}
         </CardContent>
       </Card>
       {work.type !== "movie" && (
@@ -140,14 +231,21 @@ const RatingComponent: React.FC<RatingComponentProps> = ({ work, isAuthenticated
           </Box>
         </Box>
       )}
-      {<RatingWorkModal
-        open={modalOpen}
-        onClose={handleCloseModal}
-        workId={parseInt(work.id)}
-        //fetchAverageWorkRating={fetchAverageWorkRating}
-      />}
+      {
+        <RatingWorkModal
+          open={ratingModalOpen}
+          onClose={handleCloseModal}
+          workId={parseInt(work.id)}
+          userId={userId}
+          userHasRated={userHasRated}
+          setComment={setComment}
+          setUserRating={setUserRating}
+          comment={comment}
+          userRating={userRating}
+          //fetchAverageWorkRating={fetchAverageWorkRating}
+        />
+      }
     </Box>
-    
   );
 };
 

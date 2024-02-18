@@ -27,8 +27,5 @@ module.exports = {
     publicPath: '/dist/',
   },
   plugins: [
-    new webpack.DefinePlugin({
-      'process.env': JSON.stringify(dotenv.parsed)
-    }),
   ], 
 };

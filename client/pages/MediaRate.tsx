@@ -11,9 +11,9 @@ import {
   Select,
   SelectChangeEvent,
   TextField,
-  ThemeProvider,
   Typography
 } from "@mui/material";
+import { ThemeProvider } from '@emotion/react';
 import { createTheme } from "@mui/material/styles";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -119,7 +119,7 @@ const defaultTheme = createTheme({
 });
 
 const MediaRate = () => {
-  const { verifyToken, isAuthenticated, logout } = useAuth();
+  const { verifyToken, isAuthenticated, logout, userId } = useAuth();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -366,6 +366,7 @@ const MediaRate = () => {
         <RatingComponent
           work={selectedWork}
           isAuthenticated={isAuthenticated}
+          userId={userId}
         />
       )}
     </ThemeProvider>

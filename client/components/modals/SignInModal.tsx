@@ -9,8 +9,7 @@ import Link from "@mui/material/Link";
 import { styled } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import axios from "axios";
-import * as React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 
 type SignInModalProps = {
   open: boolean;

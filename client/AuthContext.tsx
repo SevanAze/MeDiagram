@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { ReactNode, createContext, useContext, useState, useMemo } from "react";
-import jwtDecode from 'jwt-decode';
+import { JwtPayload, jwtDecode } from 'jwt-decode';
 
 
 // Assurez-vous que cette interface correspond exactement à ce que vous attendez
@@ -9,6 +9,11 @@ interface AuthContextType {
   verifyToken: () => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  userId?: number,
+}
+
+interface CustomTokenPayload extends JwtPayload {
+  id: string; // Ajoutez ici d'autres champs personnalisés si nécessaire
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,8 +39,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const response = await axios.post(`${process.env.BACKEND_URL}/token`, { token });
       setIsAuthenticated(response.data.isValid);
-      const decodedToken = jwtDecode(token);
-      setUserId(decodedToken.id)
+      const decodedToken = jwtDecode(token) as CustomTokenPayload;
+      setUserId(parseInt(decodedToken.id))
     } catch (error) {
       console.error('Token validation error:', error);
       setIsAuthenticated(false);
@@ -50,7 +55,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const providerValue = useMemo(() => ({
     verifyToken,
     logout,
-    isAuthenticated
+    isAuthenticated,
+    userId,
   }), [isAuthenticated]);
 
   return (

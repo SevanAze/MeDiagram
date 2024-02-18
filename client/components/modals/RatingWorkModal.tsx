@@ -7,12 +7,18 @@ import {
   Typography,
 } from "@mui/material";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface RatingModalProps {
   open: boolean;
   onClose: () => void;
   workId: number;
+  userId?: number;
+  userHasRated: boolean;
+  setComment: React.Dispatch<React.SetStateAction<string>>;
+  setUserRating: React.Dispatch<React.SetStateAction<string>>;
+  comment: string,
+  userRating: string,
 }
 
 const style = {
@@ -29,10 +35,17 @@ const style = {
   p: 4,
 };
 
-const RatingWorkModal: React.FC<RatingModalProps> = ({ open, onClose, workId }) => {
-  const [userRating, setUserRating] = useState<string>("");
-  const [comment, setComment] = useState<string>("");
-
+const RatingWorkModal: React.FC<RatingModalProps> = ({
+  open,
+  onClose,
+  workId,
+  userId,
+  userHasRated,
+  setComment,
+  setUserRating,
+  comment,
+  userRating,
+}) => {
   const [error, setError] = useState<string>("");
 
   const validateRating = (rating: string): boolean => {
@@ -57,19 +70,28 @@ const RatingWorkModal: React.FC<RatingModalProps> = ({ open, onClose, workId }) 
   };
 
   const handleSubmitRating = async () => {
-    if (!validateRating(userRating)) return; // Prevent submission if invalid
+    if (!validateRating(userRating)) return; // Empêche la soumission si non valide
+
+    const endpoint = userHasRated ? "/modifyRating" : "/submitRating";
 
     try {
-      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/submitRating`, {
+      const response = await axios.post(endpoint, {
+        userId: userId,
         targetId: workId,
-        targetType: "work",
+        targetType: "work", // Ou "component", selon le contexte
         rating: Number(userRating),
-        comment, // Ajout du commentaire à la requête
+        comment,
       });
-      onClose(); // Close modal after successful submission
+
+      if (response.status === 200) {
+        onClose(); // Fermer la modal après la soumission réussie
+        // Optionnellement, rafraîchir les données affichées, comme la moyenne des ratings
+      } else {
+        throw new Error("Failed to submit rating");
+      }
     } catch (error) {
-      console.error("Error submitting rating:", error);
-      setError("Error submitting rating");
+      console.error("Error submitting or updating rating:", error);
+      setError("Failed to submit or update rating");
     }
   };
 
