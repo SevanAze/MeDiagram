@@ -3,10 +3,11 @@ import path from "path";
 import authRouter from "./routes/authRouter";
 import { AppDataSource } from "../data-source";
 import mediaRouter from "./routes/mediaRouter";
+import https from "https";
+import fs from "fs";
 
 require('dotenv').config();
 const app = express();
-
 
 app.use(express.static(path.join(__dirname, "../../public")));
 app.use(express.json());
@@ -25,6 +26,12 @@ app.get("/*", (req: Request, res: Response, next: NextFunction): void => {
 
 const PORT = 3000;
 
-app.listen(PORT, () => {
+const options = {
+  key: fs.readFileSync('/home/ubuntu/MeDiagram/certificats/privkey.pem'),
+  cert: fs.readFileSync('/home/ubuntu/MeDiagram/certificats/fullchain.pem')
+};
+
+// Créer le serveur HTTPS avec les options SSL/TLS
+https.createServer(options, app).listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });
