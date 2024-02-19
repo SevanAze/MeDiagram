@@ -79,6 +79,8 @@ const getAverageRating = async (req: Request, res: Response) => {
 const submitRating = async (req: Request, res: Response) => {
   const { targetId, targetType, rating, comment, userId } = req.body;
 
+  console.log('rating', rating);
+
   // Valider les données reçues
   if ((targetType !== "work" && targetType !== "component") || !userId) {
     return res

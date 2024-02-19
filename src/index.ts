@@ -26,12 +26,9 @@ app.get("/*", (req: Request, res: Response, next: NextFunction): void => {
 
 const PORT = 3000;
 
-const options = {
-  key: fs.readFileSync('/home/ubuntu/MeDiagram/certificats/privkey.pem'),
-  cert: fs.readFileSync('/home/ubuntu/MeDiagram/certificats/fullchain.pem')
-};
+const options = {};
 
 // Créer le serveur HTTPS avec les options SSL/TLS
-https.createServer(options, app).listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });
