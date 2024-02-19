@@ -1,13 +1,6 @@
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { Alert, Box } from "@mui/material";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import Dialog from "@mui/material/Dialog";
-import Grid from "@mui/material/Grid";
-import Link from "@mui/material/Link";
+import { Avatar, Box, Button, CssBaseline, Dialog, Grid, Link, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import TextField from "@mui/material/TextField";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import axios from "axios";
 import React, { useState } from "react";
 
@@ -41,7 +34,7 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
         password,
       });
 
-      const {token , userId} = response.data;
+      const { token, userId } = response.data;
 
       if (response.status === 200 && token !== "") {
         // Store the token securely (e.g., using localStorage or encrypted cookies)
@@ -65,7 +58,7 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
       PaperProps={{
         sx: {
           borderRadius: "12px", // Arrondit les bords avec une valeur de 12px
-          width: "25%", // Agrandit la largeur de la modal à 25% de la largeur de l'écran
+          width: "90%", // Ajuste la largeur de la modal à 90% de la largeur de l'écran
           height: "auto", // Ajuste la hauteur automatiquement en fonction du contenu
           maxWidth: "none", // Supprime la limite de largeur maximale si nécessaire
           bgcolor: "black", // Fond noir
@@ -83,113 +76,59 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
         alignItems="center"
         justifyContent="center"
         spacing={2}
-        sx={{ padding: 6 }}
+        sx={{ padding: 2 }} // Réduit l'espacement
       >
         <Grid item>
           <Avatar sx={{ color: "white", bgcolor: "black" }}>
             <LockOutlinedIcon />
           </Avatar>
         </Grid>
-        <Grid item>{error && <Alert severity="error">{error}</Alert>}</Grid>
+        <Grid item>{error && <Typography variant="body1" sx={{ color: 'red' }}>{error}</Typography>}</Grid>
         <Grid
           item
           container
-          spacing={2}
           direction="column"
           alignItems="center"
-          sx={{ width: "auto" }}
+          justifyContent="center"
+          spacing={2}
+          sx={{ width: "100%", mt: 2 }}
         >
           <Box
             component="form"
             justifyContent={"center"}
             noValidate
             onSubmit={handleSubmit}
+            sx={{ width: "100%" }}
           >
-          <Grid item>
-            <TextField
-              margin="normal"
-              required
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              sx={{
-                width: "100%",
-                mb: 2,
-                ".MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "white", // Définit la couleur initiale de la bordure
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "white", // Maintient la couleur de la bordure au survol
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "white", // Bordure en blanc lors du focus
-                  },
-                },
-                ".MuiInputLabel-root": {
-                  // Couleur du label
-                  color: "white",
-                },
-                ".MuiInputBase-input": {
-                  // Couleur du texte tapé
-                  color: "white",
-                },
-              }} // Applique seulement la couleur du texte en blanc
-              InputLabelProps={{
-                style: { color: "white" }, // Couleur du label en blanc
-              }}
-              InputProps={{
-                style: { color: "white", backgroundColor: "black" }, // Couleur du texte tapé en blanc
-              }}
-            />
-          </Grid>
-          
-            <Grid item>
+            <Grid item sx={{ width: "100%" }}>
               <TextField
                 margin="normal"
                 required
+                fullWidth // Prend toute la largeur disponible
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+              />
+            </Grid>
+            <Grid item sx={{ width: "100%" }}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth // Prend toute la largeur disponible
                 name="password"
                 label="Password"
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                sx={{
-                  width: "100%",
-                  mb: 2,
-                  ".MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: "white", // Définit la couleur initiale de la bordure
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "white", // Maintient la couleur de la bordure au survol
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "white", // Bordure en blanc lors du focus
-                    },
-                  },
-                  ".MuiInputLabel-root": {
-                    // Couleur du label
-                    color: "white",
-                  },
-                  ".MuiInputBase-input": {
-                    // Couleur du texte tapé
-                    color: "white",
-                  },
-                }} // Applique seulement la couleur du texte en blanc
-                InputLabelProps={{
-                  style: { color: "white" }, // Couleur du label en blanc
-                }}
-                InputProps={{
-                  style: { color: "white" }, // Couleur du texte tapé en blanc
-                }}
               />
             </Grid>
-            <Grid item>
+            <Grid item sx={{ width: "100%" }}>
               <CustomButton
                 type="submit"
                 variant="contained"
+                fullWidth // Prend toute la largeur disponible
               >
                 Sign In
               </CustomButton>
@@ -198,7 +137,7 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
           <Grid
             item
             container
-            justifyContent="space-between"
+            justifyContent="center"
             sx={{ width: "100%" }}
           >
             <Grid item>

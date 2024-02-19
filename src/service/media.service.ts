@@ -22,4 +22,14 @@ export async function getRatingByWorkIdAndUserId(userId: string, workId: string)
       },
     });
   }
+
+  export async function getRatingByComponentIdAndUserId(userId: string, episodeId: string) {
+    const ratingRepository = AppDataSource.getRepository(Rating);
+    return await ratingRepository.findOne({
+      where: {
+        user_id: parseInt(userId, 10),
+        component_id: parseInt(episodeId, 10),
+      },
+    });
+  }
   

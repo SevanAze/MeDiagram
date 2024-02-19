@@ -10,13 +10,14 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Grid
+  Grid,
 } from "@mui/material";
 import axios from "axios";
 
 interface Episode {
   id: number;
   title: string;
+  userHasRated: boolean;
 }
 
 interface RatingEpisodeModalProps {
@@ -40,9 +41,10 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
 
   useEffect(() => {
     const fetchEpisodes = async () => {
-      // Remplacer `/api/episodes` par votre véritable endpoint d'API pour récupérer les épisodes d'une saison
       try {
-        const response = await axios.get(`/api/seasons/${seasonId}/episodes`);
+        const response = await axios.get(
+          `/getEpisodeBySeason?seasonId=${seasonId}&userId=${userId}`
+        );
         setEpisodes(response.data);
       } catch (error) {
         console.error("Error fetching episodes:", error);
@@ -50,29 +52,23 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
     };
 
     if (seasonId) fetchEpisodes();
-  }, [seasonId]);
+  }, [seasonId, open]);
 
   const handleSubmit = async () => {
-    // Valider la note et le commentaire avant de soumettre
-    if (!selectedEpisodeId) {
-      setError("Please select an episode.");
-      return;
-    }
-    if (!rating) {
-      setError("Please provide a rating.");
+    if (!selectedEpisodeId || !rating) {
+      setError("Please select an episode and provide a rating.");
       return;
     }
 
-    // Remplacer `/submitRating` par votre véritable endpoint d'API pour soumettre la note
     try {
       await axios.post(`/submitRating`, {
-        userId,
+        userId: userId,
         targetId: selectedEpisodeId,
-        targetType: "episode", // Assurez-vous que votre backend traite ce targetType
+        targetType: "component",
         rating: Number(rating),
-        comment,
+        comment: comment,
       });
-      onClose(); // Fermer la modal après soumission réussie
+      onClose();
     } catch (error) {
       console.error("Error submitting rating:", error);
       setError("Failed to submit rating.");
@@ -81,13 +77,22 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ ...style, width: 400, p: 4 }}>
+      <Box sx={{ ...style, width: 400, bgcolor: "black", color: "white" }}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
           Rate an Episode
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
-        <FormControl fullWidth sx={{ mt: 2 }}>
-          <InputLabel id="episode-select-label">Episode</InputLabel>
+        <FormControl
+          fullWidth
+          sx={{
+            mt: 2,
+            ".MuiInputBase-root": { color: "white" },
+            ".MuiOutlinedInput-notchedOutline": { borderColor: "white" },
+          }}
+        >
+          <InputLabel id="episode-select-label" sx={{ color: "white" }}>
+            Episode
+          </InputLabel>
           <Select
             labelId="episode-select-label"
             id="episode-select"
@@ -97,7 +102,7 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
           >
             {episodes.map((episode) => (
               <MenuItem key={episode.id} value={episode.id}>
-                {episode.title}
+                {episode.title} {episode.userHasRated ? "(Already rated)" : ""}
               </MenuItem>
             ))}
           </Select>
@@ -112,6 +117,15 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
           onChange={(e) => setRating(e.target.value)}
           InputProps={{
             inputProps: { min: 0, max: 10 },
+            style: { color: "white" },
+          }}
+          InputLabelProps={{
+            style: { color: "white" },
+          }}
+          sx={{
+            ".MuiOutlinedInput-root": {
+              "& fieldset": { borderColor: "white" },
+            },
           }}
         />
         <TextField
@@ -124,10 +138,26 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
           rows={4}
           value={comment}
           onChange={(e) => setComment(e.target.value)}
+          InputProps={{
+            style: { color: "white" },
+          }}
+          InputLabelProps={{
+            style: { color: "white" },
+          }}
+          sx={{
+            ".MuiOutlinedInput-root": {
+              "& fieldset": { borderColor: "white" },
+            },
+          }}
         />
         <Button
           onClick={handleSubmit}
-          sx={{ mt: 2, bgcolor: "primary.main", color: "white" }}
+          sx={{
+            mt: 2,
+            bgcolor: "grey",
+            color: "white",
+            "&:hover": { bgcolor: "grey.700" },
+          }}
         >
           Submit
         </Button>
@@ -141,7 +171,6 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
 };

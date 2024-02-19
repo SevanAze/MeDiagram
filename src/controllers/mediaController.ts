@@ -36,7 +36,8 @@ const getAverageRating = async (req: Request, res: Response) => {
   const { targetId, targetType } = req.body;
 
   try {
-    let queryBuilder = AppDataSource.getRepository(Rating).createQueryBuilder("rating");
+    let queryBuilder =
+      AppDataSource.getRepository(Rating).createQueryBuilder("rating");
 
     // Convertir targetId en nombre pour éviter les erreurs de type.
     const numericTargetId = parseInt(targetId, 10);
@@ -49,8 +50,9 @@ const getAverageRating = async (req: Request, res: Response) => {
         .andWhere("rating.component_id IS NULL");
     } else {
       // La logique pour "component" reste inchangée.
-      queryBuilder = queryBuilder
-        .where("rating.component_id = :targetId", { targetId: numericTargetId });
+      queryBuilder = queryBuilder.where("rating.component_id = :targetId", {
+        targetId: numericTargetId,
+      });
     }
 
     // Exécuter la requête pour calculer la moyenne et le nombre de ratings.
@@ -59,7 +61,9 @@ const getAverageRating = async (req: Request, res: Response) => {
       .addSelect("COUNT(rating.id)", "count")
       .getRawOne();
 
-    const averageRating = result.average ? parseFloat(result.average).toFixed(1) : "Not rated yet";
+    const averageRating = result.average
+      ? parseFloat(result.average).toFixed(1)
+      : "Not rated yet";
     const ratingsCount = parseInt(result.count, 10);
 
     // Envoyer le résultat.
@@ -75,11 +79,10 @@ const getAverageRating = async (req: Request, res: Response) => {
   }
 };
 
-
 const submitRating = async (req: Request, res: Response) => {
   const { targetId, targetType, rating, comment, userId } = req.body;
 
-  console.log('rating', rating);
+  console.log("userId", userId);
 
   // Valider les données reçues
   if ((targetType !== "work" && targetType !== "component") || !userId) {
@@ -106,12 +109,6 @@ const submitRating = async (req: Request, res: Response) => {
     } else if (targetType === "component") {
       existingRating = await ratingRepository.findOne({
         where: { component_id: targetId, user_id: userId },
-      });
-    }
-
-    if (existingRating) {
-      return res.status(403).json({
-        message: "User has already submitted a rating for this target.",
       });
     }
 
@@ -265,13 +262,11 @@ const computeComments = async (req: Request, res: Response) => {
 
   try {
     // Compter le nombre total de ratings
-    const totalRatings = await AppDataSource
-    .getRepository(Rating)
-    .createQueryBuilder("rating")
-    .where("rating.work_id = :workId", { workId })
-    .andWhere("rating.component_id IS NULL")
-    .getCount();
-
+    const totalRatings = await AppDataSource.getRepository(Rating)
+      .createQueryBuilder("rating")
+      .where("rating.work_id = :workId", { workId })
+      .andWhere("rating.component_id IS NULL")
+      .getCount();
 
     // Calculer le nombre total de pages
     const totalPages = Math.ceil(totalRatings / ratingsPerPage);
@@ -338,7 +333,7 @@ const getRatingsBySeason = async (req: Request, res: Response) => {
       .getRawMany();
 
     // Transformer les résultats pour s'assurer que la moyenne des notes est un nombre flottant
-    const transformedRatings = episodeRatings.map(rating => ({
+    const transformedRatings = episodeRatings.map((rating) => ({
       episodeNumber: rating.episodeNumber,
       averageRating: parseFloat(rating.averageRating).toFixed(1),
     }));
@@ -350,7 +345,83 @@ const getRatingsBySeason = async (req: Request, res: Response) => {
   }
 };
 
+const getEpisodeBySeason = async (req: Request, res: Response) => {
+  const { seasonId, userId } = req.query;
 
+  try {
+    const episodes = await AppDataSource.getRepository(Component)
+      .createQueryBuilder("component")
+      .where("component.parent_id = :seasonId", { seasonId })
+      .andWhere("component.type = :type", { type: "episode" })
+      .orderBy("component.number", "ASC")
+      .getMany();
+
+    // Récupérer tous les ratings de l'utilisateur pour les épisodes de la saison en question
+    const userRatings = await AppDataSource.getRepository(Rating)
+      .createQueryBuilder("rating")
+      .where("rating.user_id = :userId", { userId })
+      .andWhere("rating.component_id IN (:...episodeIds)", {
+        episodeIds: episodes.map((e) => e.id),
+      })
+      .getMany();
+
+    // Créer un Set des IDs des épisodes notés par l'utilisateur pour un accès rapide
+    const ratedEpisodeIds = new Set(userRatings.map((r) => r.component_id));
+
+    // Ajouter l'information si l'utilisateur a noté l'épisode dans les données des épisodes
+    const episodesWithUserRating = episodes.map((episode) => ({
+      id: episode.id,
+      title: episode.title,
+      number: episode.number,
+      userHasRated: ratedEpisodeIds.has(episode.id),
+    }));
+
+    res.json(episodesWithUserRating);
+  } catch (error) {
+    console.error("Error fetching episodes:", error);
+    res.status(500).json({ message: "Error fetching episodes" });
+  }
+};
+
+const getTopRatedWorks = async (req: Request, res: Response) => {
+  try {
+    // Utilisation du Query Builder pour calculer la moyenne des notes pour chaque travail et récupérer les 3 meilleurs.
+    const topRatedWorkIds = await AppDataSource
+      .getRepository(Rating)
+      .createQueryBuilder('rating')
+      .select('rating.work_id', 'workId')
+      .addSelect('AVG(rating.rating)', 'averageRating')
+      .groupBy('rating.work_id')
+      .orderBy('averageRating', 'DESC')
+      .limit(3)
+      .getRawMany();
+      const workIds = topRatedWorkIds.map(work => work.workId);
+
+    const worksWithImages = await AppDataSource
+      .getRepository(Work)
+      .createQueryBuilder('work')
+      .leftJoinAndSelect('work.mediaImage', 'mediaImage') // Assumant que 'mediaImage' est la relation/le nom de champ
+      .where('work.id IN (:...workIds)', { workIds })
+      .getMany();
+
+    // Fusionner les informations
+    const mergedDetails = topRatedWorkIds.map(work => {
+      const foundWork = worksWithImages.find(w => w.id === work.workId);
+      return {
+        ...work,
+        image_path: foundWork?.mediaImage?.image_path || 'default/path/if/missing'
+      };
+    });
+
+    console.log(mergedDetails)
+
+    res.json(mergedDetails);
+  } catch (error) {
+    console.error("Error fetching top rated works:", error);
+    res.status(500).json({ message: "Error fetching top rated works." });
+  }
+
+};
 
 export {
   getAverageRating,
@@ -363,4 +434,6 @@ export {
   computeComments,
   getSeasonsByWorkId,
   getRatingsBySeason,
+  getEpisodeBySeason,
+  getTopRatedWorks,
 };

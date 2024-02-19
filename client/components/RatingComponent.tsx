@@ -14,7 +14,7 @@ import { Work } from "../types/Work";
 import RatingWorkModal from "./modals/RatingWorkModal";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import RatingComments from "./RatingComment";
-import RatingGraph from "./RateGraphTvShow";
+import RateGraphTvShow from "./RateGraphTvShow";
 
 interface RatingComponentProps {
   work: Work;
@@ -235,7 +235,7 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
             </Typography>
             <Divider sx={{ my: 1, bgcolor: "grey.700" }} />
               <Grid item>
-                <RatingGraph workId={work.id} />
+                <RateGraphTvShow workId={work.id} userId={userId} isAuthenticated={isAuthenticated} />
               </Grid>
           </Box>
         )}

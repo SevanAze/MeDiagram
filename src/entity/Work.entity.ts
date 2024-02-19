@@ -8,6 +8,7 @@ import {
 } from "typeorm";
 import { MediaImage } from "./MediaImage.entity";
 import { Component } from "./Component.entity";
+import { Rating } from "./Rating.entity";
 
 export enum WorkType {
   TVShow = "serie_tv",
@@ -46,4 +47,8 @@ export class Work {
   // Relation OneToMany avec Component
   @OneToMany(() => Component, component => component.work, { cascade: true })
   component!: Component[];
+
+  // Supposons qu'il y ait une relation OneToMany avec une entité Rating
+  @OneToMany(() => Rating, rating => rating.work)
+  ratings?: Rating[];
 }

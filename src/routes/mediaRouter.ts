@@ -3,10 +3,12 @@ import {
     computeComments,
     deleteRating,
   getAverageRating,
+  getEpisodeBySeason,
   getMediaByType,
   getRatingsBySeason,
   getSeasonsByWorkId,
   getSpecificRating,
+  getTopRatedWorks,
   hasUserRated,
   modifyRating,
   submitRating,
@@ -24,6 +26,10 @@ routerMedia.post("/deleteRating", deleteRating);
 routerMedia.get("/computeComments", computeComments);
 routerMedia.get("/getSeasonsByWorkId", getSeasonsByWorkId);
 routerMedia.get("/getRatingsBySeason", getRatingsBySeason);
+routerMedia.get("/getEpisodeBySeason", getEpisodeBySeason);
+routerMedia.get("/getTopRatedWorks", getTopRatedWorks);
+
+
 
 
 
