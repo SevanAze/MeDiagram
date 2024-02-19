@@ -32,6 +32,6 @@ const options = {
 };
 
 // Créer le serveur HTTPS avec les options SSL/TLS
-app.listen(PORT, () => {
+https.createServer(options, app).listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });
