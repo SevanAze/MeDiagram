@@ -26,10 +26,10 @@ app.get("/*", (req: Request, res: Response, next: NextFunction): void => {
 
 const PORT = 3000;
 
-/*const options = {
+const options = {
   key: fs.readFileSync('./certificats/privkey.pem'),
   cert: fs.readFileSync('./certificats/fullchain.pem')
-};*/
+};
 
 // Créer le serveur HTTPS avec les options SSL/TLS
 app.listen(PORT, () => {
