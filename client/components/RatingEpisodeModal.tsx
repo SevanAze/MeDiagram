@@ -18,6 +18,8 @@ interface Episode {
   id: number;
   title: string;
   userHasRated: boolean;
+  rating?: number;
+  comment?: string;
 }
 
 interface RatingEpisodeModalProps {
@@ -25,6 +27,7 @@ interface RatingEpisodeModalProps {
   onClose: () => void;
   seasonId: number;
   userId?: number;
+  workId: string;
 }
 
 const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
@@ -32,12 +35,14 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
   onClose,
   seasonId,
   userId,
+  workId,
 }) => {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<number | "">("");
   const [rating, setRating] = useState("");
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
+  const [hasUserRated, setHasUserRated] = useState(false);
 
   useEffect(() => {
     const fetchEpisodes = async () => {
@@ -54,54 +59,65 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
     if (seasonId) fetchEpisodes();
   }, [seasonId, open]);
 
+  useEffect(() => {
+    const selectedEpisode = episodes.find(episode => episode.id === Number(selectedEpisodeId));
+    if (selectedEpisode) {
+      if (selectedEpisode.userHasRated) {
+        setRating(selectedEpisode.rating?.toString() || "");
+        setComment(selectedEpisode.comment || "");
+        setHasUserRated(true);
+      } else {
+        setRating("");
+        setComment("");
+        setHasUserRated(false);
+      }
+    }
+  }, [selectedEpisodeId, episodes]);
+
   const handleSubmit = async () => {
     if (!selectedEpisodeId || !rating) {
       setError("Please select an episode and provide a rating.");
       return;
     }
 
+    const url = hasUserRated ? `/modifyRating` : `/submitRating`;
+    const data = {
+      userId: userId,
+      targetId: selectedEpisodeId,
+      targetType: "component",
+      rating: Number(rating),
+      comment: comment,
+      workId: workId,
+    };
+
     try {
-      await axios.post(`/submitRating`, {
-        userId: userId,
-        targetId: selectedEpisodeId,
-        targetType: "component",
-        rating: Number(rating),
-        comment: comment,
-      });
+      await axios.post(url, data);
       onClose();
     } catch (error) {
-      console.error("Error submitting rating:", error);
-      setError("Failed to submit rating.");
+      console.error(`Error ${hasUserRated ? "modifying" : "submitting"} rating:`, error);
+      setError(`Failed to ${hasUserRated ? "modify" : "submit"} rating.`);
     }
   };
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ ...style, width: 400, bgcolor: "black", color: "white" }}>
-        <Typography id="modal-modal-title" variant="h6" component="h2">
+      <Box sx={{ ...style, width: 400, bgcolor: "#313131" }}>
+        <Typography id="modal-modal-title" variant="h6" component="h2" color="white">
           Rate an Episode
         </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
-        <FormControl
-          fullWidth
-          sx={{
-            mt: 2,
-            ".MuiInputBase-root": { color: "white" },
-            ".MuiOutlinedInput-notchedOutline": { borderColor: "white" },
-          }}
-        >
-          <InputLabel id="episode-select-label" sx={{ color: "white" }}>
-            Episode
-          </InputLabel>
+        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+        <FormControl fullWidth sx={{ mt: 3 }}>
+          <InputLabel id="episode-select-label" sx={{ color: "white" }}>Episode</InputLabel>
           <Select
             labelId="episode-select-label"
             id="episode-select"
             value={selectedEpisodeId}
             label="Episode"
             onChange={(e) => setSelectedEpisodeId(Number(e.target.value))}
+            sx={{ color: "white", ".MuiOutlinedInput-notchedOutline": { borderColor: "white" } }}
           >
             {episodes.map((episode) => (
-              <MenuItem key={episode.id} value={episode.id}>
+              <MenuItem key={episode.id} value={episode.id} sx={{ color: "#313131", backgroundColor: "white" }}>
                 {episode.title} {episode.userHasRated ? "(Already rated)" : ""}
               </MenuItem>
             ))}
@@ -122,11 +138,6 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
           InputLabelProps={{
             style: { color: "white" },
           }}
-          sx={{
-            ".MuiOutlinedInput-root": {
-              "& fieldset": { borderColor: "white" },
-            },
-          }}
         />
         <TextField
           fullWidth
@@ -144,11 +155,6 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
           InputLabelProps={{
             style: { color: "white" },
           }}
-          sx={{
-            ".MuiOutlinedInput-root": {
-              "& fieldset": { borderColor: "white" },
-            },
-          }}
         />
         <Button
           onClick={handleSubmit}
@@ -156,7 +162,7 @@ const RatingEpisodeModal: React.FC<RatingEpisodeModalProps> = ({
             mt: 2,
             bgcolor: "grey",
             color: "white",
-            "&:hover": { bgcolor: "grey.700" },
+            '&:hover': { bgcolor: "grey.700" },
           }}
         >
           Submit
@@ -171,8 +177,10 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
+  bgcolor: "#313131",
   boxShadow: 24,
   p: 4,
+  color: "white",
 };
 
 export default RatingEpisodeModal;

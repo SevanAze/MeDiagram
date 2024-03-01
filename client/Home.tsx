@@ -1,14 +1,44 @@
-import { Card, CardContent, CardMedia, Container, CssBaseline, Grid, Typography } from "@mui/material";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { default as React, useEffect, useState } from "react";
+import "swiper/css";
+import "swiper/css/autoplay";
+import "swiper/css/effect-coverflow";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import {
+  Autoplay,
+  EffectCoverflow,
+  Navigation,
+  Pagination,
+} from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardMedia,
+  Container,
+  CssBaseline,
+  Rating,
+  Typography,
+} from "@mui/material";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useAuth } from "./AuthContext";
 import ResponsiveAppBar from "./components/ResponsiveAppBar";
 
 const defaultTheme = createTheme({
   palette: {
     background: {
-      default: "#121212",
+      default: "#000000",
+    },
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+        .swiper-button-next, .swiper-button-prev {
+          color: white !important;
+        }
+      `,
     },
   },
 });
@@ -16,6 +46,7 @@ const defaultTheme = createTheme({
 function Home() {
   const { verifyToken, isAuthenticated, logout } = useAuth();
   const [topRatedWorks, setTopRatedWorks] = useState([]);
+  const [initialSlide, setInitialSlide] = useState(0);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -29,6 +60,9 @@ function Home() {
     try {
       const response = await axios.get("/getTopRatedWorks");
       setTopRatedWorks(response.data);
+
+      const middleIndex = Math.floor(response.data.length / 2);
+      setInitialSlide(middleIndex);
     } catch (error) {
       console.error("Error fetching top rated works:", error);
     }
@@ -38,30 +72,65 @@ function Home() {
     <ThemeProvider theme={defaultTheme}>
       <CssBaseline />
       <ResponsiveAppBar isAuthenticated={isAuthenticated} logout={logout} />
-      <Container component="main" maxWidth="md" sx={{ mt: 4 }}>
-        {/* Ajoutez un espace au-dessus du Container */}
-        <Grid container spacing={4} justifyContent={'center'}>
+      <Container component="main" maxWidth="lg" sx={{ mt: 4 }}>
+        <Box sx={{ bgcolor: "black", p: 2, mb: 4 }}>
+          <Typography variant="h4" color="white" textAlign="center">
+            Top Rated Medias
+          </Typography>
+        </Box>
+        <Swiper
+          modules={[Navigation, Autoplay, EffectCoverflow]}
+          centeredSlides={true}
+          spaceBetween={50}
+          initialSlide={initialSlide}
+          slidesPerView={3}
+          navigation
+          autoplay={{
+            delay: 2500,
+            disableOnInteraction: true,
+          }}
+          effect={"coverflow"}
+          coverflowEffect={{
+            rotate: 50,
+            stretch: 0,
+            depth: 100,
+            modifier: 1,
+            slideShadows: true,
+          }}
+        >
           {topRatedWorks.map((work) => (
-            <Grid item xs={12} sm={6} md={4} key={work?.workId}>
-              <Card sx={{ bgcolor: '#2b2b2b', color: '#ffffff' }}>
+            <SwiperSlide key={work?.workId}>
+              <Card
+                sx={{
+                  bgcolor: "#313131",
+                  color: "#ffffff",
+                  width: 300,
+                }}
+              >
                 <CardMedia
-                  sx={{ width: 251, height: 251, objectFit: "contain", bgcolor: '#2B2B2B', mt: 1 }}
                   component="img"
-                  image={work?.image_path || "https://via.placeholder.com/210x295"}
+                  sx={{
+                    height: 400,
+                    objectFit: "cover",
+                  }}
+                  image={
+                    work?.image_path || "https://via.placeholder.com/210x295"
+                  }
                   alt={work.title}
                 />
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Typography gutterBottom variant="h5" component="div">
-                    {work.title}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'white' }}>
-                    Rating: {parseFloat(work.averageRating).toFixed(1)}
-                  </Typography>
+                <CardContent sx={{ textAlign: "center", paddingBottom: 6 }}>
+                  <Rating
+                    name="read-only"
+                    value={parseFloat(work.averageRating as string) / 2}
+                    precision={0.5}
+                    readOnly
+                    sx={{ verticalAlign: "middle" }}
+                  />
                 </CardContent>
               </Card>
-            </Grid>
+            </SwiperSlide>
           ))}
-        </Grid>
+        </Swiper>
       </Container>
     </ThemeProvider>
   );

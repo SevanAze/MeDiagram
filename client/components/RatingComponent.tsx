@@ -4,8 +4,10 @@ import {
   Card,
   CardContent,
   CardMedia,
+  Chip,
   Divider,
   Grid,
+  Rating,
   Typography,
 } from "@mui/material";
 import axios from "axios";
@@ -20,16 +22,46 @@ interface RatingComponentProps {
   work: Work;
   isAuthenticated: boolean;
   userId?: number;
+  selectedMediaType: string;
 }
+
+interface CustomBoxProps {
+  contentComponent: React.ReactNode;
+}
+
+const CustomBox: React.FC<CustomBoxProps> = ({ contentComponent }) => {
+  return (
+    <Box
+      component="a"
+      href="#basic-chip"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        padding: "10px",
+        gap: "10px",
+        backgroundColor: "#313131",
+        color: "white",
+        border: "1px solid white",
+        borderRadius: "16px",
+        textDecoration: "none",
+        maxWidth: "fit-content",
+        overflow: "hidden",
+        whiteSpace: "normal",
+      }}
+    >
+      {contentComponent}
+    </Box>
+  );
+};
 
 const RatingComponent: React.FC<RatingComponentProps> = ({
   work,
   isAuthenticated,
   userId,
+  selectedMediaType,
 }) => {
-  const [averageWorkRating, setAverageWorkRating] = useState<string | number>(
-    "Loading..."
-  );
+  const [averageWorkRating, setAverageWorkRating] = useState<string | number>("Loading...");
   const [ratesCount, setRatesCount] = useState<number>();
   const [ratingModalOpen, setRatingModalOpen] = useState<boolean>(false);
   const [userHasRated, setUserHasRated] = useState(false);
@@ -52,7 +84,6 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
           targetId: work.id,
           targetType: "work",
         });
-
         setAverageWorkRating(response.data.averageRating);
         setRatesCount(response.data.ratingsCount);
       } catch (error) {
@@ -60,7 +91,6 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
         setAverageWorkRating("Not rated yet");
       }
     };
-
     fetchAverageWorkRating();
   }, [work, ratingModalOpen]);
 
@@ -119,99 +149,136 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
         >
           <CardMedia
             component="img"
-            sx={{ width: 251, height: 251, objectFit: "contain" }}
+            sx={{ width: 251, height: 300, objectFit: "contain" }}
             image={
               work.mediaImage?.image_path ||
               "https://via.placeholder.com/250x150"
             }
             alt={work.title}
           />
-          <CardContent sx={{ mx: 2, bgcolor: "#313131" }}>
+          <CardContent sx={{ mx: 2, bgcolor: "#313131", flexGrow: 1 }}>
             <Typography variant="h5" component="div">
               {work.title}
             </Typography>
             <Divider sx={{ my: 1, bgcolor: "grey.700" }} />
-            <Typography variant="body2" sx={{ color: "white" }}>
-              <span style={{ fontWeight: "bold", fontSize: 15 }}>
-                Description :
-              </span>{" "}
-              {work.description}
-            </Typography>
-            <Divider sx={{ my: 1, bgcolor: "grey.700" }} />
-            <Typography variant="body2" sx={{ color: "white" }}>
-              <span style={{ fontWeight: "bold", fontSize: 15 }}>
-                Release Year :
-              </span>{" "}
-              {work.releaseYear}
-            </Typography>
-            <Divider sx={{ my: 1, bgcolor: "grey.700" }} />
-            <Typography variant="body2" sx={{ color: "white" }}>
-              <span style={{ fontWeight: "bold", fontSize: 15 }}>Genre :</span>{" "}
-              {work.genre}
-            </Typography>
-            <Divider sx={{ my: 1, bgcolor: "grey.700" }} />
-            <Grid container alignItems="center" spacing={1}>
-              <Grid item>
+            <CustomBox
+              contentComponent={
                 <Typography variant="body2" sx={{ color: "white" }}>
                   <span style={{ fontWeight: "bold", fontSize: 15 }}>
-                    Rating :
+                    Description :
                   </span>{" "}
-                  {averageWorkRating + " / 10"}{" "}
+                  {work.description}
                 </Typography>
-              </Grid>
-              <Grid item>
+              }
+            />
+            <Divider sx={{ my: 1, bgcolor: "grey.700" }} />
+            <CustomBox
+              contentComponent={
                 <Typography variant="body2" sx={{ color: "white" }}>
                   <span style={{ fontWeight: "bold", fontSize: 15 }}>
-                    Rates :
+                    Release Year :
                   </span>{" "}
-                  {ratesCount}
+                  {work.releaseYear}
                 </Typography>
-              </Grid>
-            </Grid>
+              }
+            />
+            <Divider sx={{ my: 1, bgcolor: "grey.700" }} />
+            <CustomBox
+              contentComponent={
+                <Typography variant="body2" sx={{ color: "white" }}>
+                  <span style={{ fontWeight: "bold", fontSize: 15 }}>
+                    Genre :
+                  </span>{" "}
+                  {work.genre}
+                </Typography>
+              }
+            />
+            <Divider sx={{ my: 1, bgcolor: "grey.700" }} />
             <Grid container alignItems="center" spacing={1}>
+              <Grid item xs={12}>
+                <CustomBox
+                  contentComponent={
+                    <Grid container direction="row" alignItems="center" spacing={1}>
+                      <Grid item>
+                        <Typography variant="body2" sx={{ color: "white" }}>
+                          <span style={{ fontWeight: "bold", fontSize: 15 }}>
+                            Rating:
+                          </span>
+                        </Typography>
+                      </Grid>
+                      <Grid item>
+                        <Rating
+                          name="read-only"
+                          value={parseInt(averageWorkRating as string) / 2}
+                          precision={0.5}
+                          readOnly
+                          sx={{ verticalAlign: "middle" }}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Typography variant="body2" sx={{ color: "white" }}>
+                          <span style={{ fontWeight: "bold", fontSize: 15 }}>
+                            Rates:
+                          </span>{" "}
+                          {ratesCount}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  }
+                />
+              </Grid>
               {isAuthenticated && (
-                <>
+                <Grid item xs={12}>
                   {!userHasRated ? (
-                    // Lorsque l'utilisateur n'a pas encore noté
-                    <>
-                      <Grid item>
-                        <Typography
-                          onClick={handleOpenModal}
-                          variant="body2"
-                          sx={{ color: "white" }}
-                        >
-                          {"Add your rating "}
-                        </Typography>
-                      </Grid>
-                      <Grid item>
-                        <AddBoxIcon
-                          sx={{ color: "white", verticalAlign: "middle" }}
-                          onClick={handleOpenModal}
-                        />
-                      </Grid>
-                    </>
+                    <Typography
+                      onClick={handleOpenModal}
+                      variant="body2"
+                      sx={{ color: "white" }}
+                    >
+                      <Chip
+                        icon={<AddBoxIcon sx={{ color: "white" }} />}
+                        label="Add your rating"
+                        clickable
+                        variant="outlined"
+                        sx={{
+                          color: "white",
+                          borderColor: "white",
+                          "& .MuiSvgIcon-root": { color: "white" },
+                        }}
+                      />
+                    </Typography>
                   ) : (
-                    // Lorsque l'utilisateur a déjà noté
-                    <>
+                    <Grid container direction="row" alignItems="center" spacing={1}>
                       <Grid item>
                         <Typography
                           onClick={handleOpenModal}
                           variant="body2"
-                          sx={{ color: "white" }}
+                          sx={{ color: "white", cursor: "pointer" }}
                         >
-                          {"Your rating : "}
-                          {userRating + " / 10"}{" "}
+                          <span style={{ fontWeight: "bold", fontSize: 15 }}>
+                            Your rating :
+                          </span>
+                          {" " + userRating + " / 10"}
                         </Typography>
                       </Grid>
                       <Grid item>
-                        <BorderColorIcon
-                          sx={{ color: "white", verticalAlign: "middle" }}
+                        <Chip
                           onClick={handleOpenModal}
+                          icon={<BorderColorIcon sx={{ color: "white" }} />}
+                          label="Edit your rating"
+                          sx={{
+                            color: "white",
+                            borderColor: "white",
+                            "& .MuiSvgIcon-root": { color: "white" },
+                            cursor: "pointer",
+                          }}
+                          clickable
+                          variant="outlined"
                         />
                       </Grid>
-                    </>
+                    </Grid>
                   )}
-                </>
+                </Grid>
               )}
             </Grid>
           </CardContent>
@@ -234,9 +301,13 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
               Season Ratings
             </Typography>
             <Divider sx={{ my: 1, bgcolor: "grey.700" }} />
-              <Grid item>
-                <RateGraphTvShow workId={work.id} userId={userId} isAuthenticated={isAuthenticated} />
-              </Grid>
+            <Grid item>
+              <RateGraphTvShow
+                workId={work.id}
+                userId={userId}
+                isAuthenticated={isAuthenticated}
+              />
+            </Grid>
           </Box>
         )}
       </Grid>
@@ -255,7 +326,6 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
         setUserRating={setUserRating}
         comment={comment}
         userRating={userRating}
-        //fetchAverageWorkRating={fetchAverageWorkRating}
       />
     </Grid>
   );

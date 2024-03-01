@@ -1,6 +1,6 @@
 const path = require("path");
-const dotenv = require('dotenv').config();
-const webpack = require('webpack');
+const dotenv = require("dotenv").config();
+const webpack = require("webpack");
 
 module.exports = {
   entry: "./client/index.tsx",
@@ -11,7 +11,11 @@ module.exports = {
         use: "ts-loader",
         exclude: /node_modules/,
       },
-          ],
+      {
+        test: /\.css$/,
+        use: [ 'style-loader', 'css-loader' ]
+     }
+    ],
   },
   mode: "development",
   resolve: {
@@ -24,8 +28,7 @@ module.exports = {
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname, "public"),
-    publicPath: '/dist/',
+    publicPath: "/dist/",
   },
-  plugins: [
-  ], 
+  plugins: [],
 };
