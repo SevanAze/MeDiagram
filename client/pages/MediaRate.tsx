@@ -132,8 +132,8 @@ const MediaRate = () => {
   // Simulez des données ou récupérez-les depuis une API
   const mediaTypes = [
     { label: "TV Shows", value: "serie_tv" },
-    { label: "Mangas", value: "manga" },
-    { label: "Book Sagas", value: "book_saga" },
+    //{ label: "Mangas", value: "manga" },
+    //{ label: "Book Sagas", value: "book_saga" },
     { label: "Movies", value: "movie" },
   ];
 
