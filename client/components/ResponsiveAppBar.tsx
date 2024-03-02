@@ -16,8 +16,8 @@ import SignInModal from "./modals/SignInModal";
 import { useNavigate } from "react-router-dom";
 
 const pages = ["Rate a media"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
-
+// const settings = ["Profile", "Account", "Dashboard", "Logout"]; // Menu utilisateur avec différentes options (non implémentées)
+const settings = ["Logout"];
 type ResponsiveAppBarProps = {
   isAuthenticated: boolean;
   logout: () => void;
