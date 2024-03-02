@@ -60,6 +60,7 @@ function Home() {
     try {
       const response = await axios.get("/getTopRatedWorks");
       setTopRatedWorks(response.data);
+      console.log(setTopRatedWorks);
 
       const middleIndex = Math.floor(response.data.length / 2);
       setInitialSlide(middleIndex);
@@ -99,7 +100,7 @@ function Home() {
           }}
         >
           {topRatedWorks.map((work) => (
-            <SwiperSlide key={work?.workId}>
+            <SwiperSlide key={(work as { workId?: string })?.workId}>
               <Card
                 sx={{
                   bgcolor: "#313131",
@@ -114,14 +115,14 @@ function Home() {
                     objectFit: "cover",
                   }}
                   image={
-                    work?.image_path || "https://via.placeholder.com/210x295"
+                    (work as { image_path?: string })?.image_path || "https://via.placeholder.com/210x295"
                   }
-                  alt={work.title}
+                  alt={(work as { title?: string })?.title}
                 />
                 <CardContent sx={{ textAlign: "center", paddingBottom: 6 }}>
                   <Rating
                     name="read-only"
-                    value={parseFloat(work.averageRating as string) / 2}
+                    value={parseFloat((work as { averageRating?: string }).averageRating as string) / 2}
                     precision={0.5}
                     readOnly
                     sx={{ verticalAlign: "middle" }}

@@ -362,8 +362,7 @@ const MediaRate = () => {
         <RatingComponent
           work={selectedWork}
           isAuthenticated={isAuthenticated}
-          userId={userId}
-        />
+          userId={userId} selectedMediaType={""}        />
       )}
     </ThemeProvider>
   );
