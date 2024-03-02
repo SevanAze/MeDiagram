@@ -91,16 +91,16 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
           alignItems="center"
           justifyContent="center"
           spacing={2}
-          sx={{ width: "100%", mt: 2 }}
+          sx={{ width: "100%", color: "white", mt: 2 }}
         >
           <Box
             component="form"
             justifyContent={"center"}
             noValidate
             onSubmit={handleSubmit}
-            sx={{ width: "100%" }}
+            sx={{ width: "100%", color: "white" }}
           >
-            <Grid item sx={{ width: "100%" }}>
+            <Grid item sx={{ width: "100%", color: "white", borderColor: "white" }}>
               <TextField
                 margin="normal"
                 required
@@ -110,9 +110,15 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
                 name="email"
                 autoComplete="email"
                 autoFocus
+                InputProps={{
+                  style: { color: "white", borderColor: "white" }, 
+                }}
+                InputLabelProps={{
+                  style: { color: "white", borderColor: "white" },
+                }}
               />
             </Grid>
-            <Grid item sx={{ width: "100%" }}>
+            <Grid item sx={{ width: "100%", color: "white", borderColor: "white"  }}>
               <TextField
                 margin="normal"
                 required
@@ -122,6 +128,12 @@ export default function SignInModal({ open, handleClose }: SignInModalProps) {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                InputProps={{
+                  style: { color: "white", borderColor: "white" }, 
+                }}
+                InputLabelProps={{
+                  style: { color: "white", borderColor: "white" },
+                }}
               />
             </Grid>
             <Grid item sx={{ width: "100%" }}>
