@@ -8,6 +8,7 @@ import fs from "fs";
 
 require('dotenv').config();
 const app = express();
+const http = require('http');
 
 app.use(express.static(path.join(__dirname, "../../public")));
 app.use(express.json());
@@ -24,14 +25,27 @@ app.get("/*", (req: Request, res: Response, next: NextFunction): void => {
   }
 });
 
-const PORT = 3000;
+app.use((req, res, next) => {
+  if (!req.secure) {
+    return res.redirect(['https://', req.get('Host'), req.url].join(''));
+  }
+  next();
+});
+
+
+const HTTP_PORT = 3080;
+const HTTPS_PORT = 3000;
 
 const options = {
   key: fs.readFileSync('./certificats/privkey.pem'),
   cert: fs.readFileSync('./certificats/fullchain.pem')
 };
 
+http.createServer(app).listen(HTTP_PORT, () => {
+  console.log(`App listening on port ${HTTP_PORT}`);
+});
+
 // Créer le serveur HTTPS avec les options SSL/TLS
-  https.createServer(options, app).listen(PORT, () => {
-    console.log(`App listening on port ${PORT}`);
+  https.createServer(options, app).listen(HTTPS_PORT, () => {
+    console.log(`App listening on port ${HTTPS_PORT}`);
   });
