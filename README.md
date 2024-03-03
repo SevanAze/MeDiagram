@@ -1,5 +1,6 @@
 # MeDiagram
 🇬🇧 : A project that seeks to help binge-watchers and binge-readers.
+
 🇫🇷 : Projet ayant pour objectif de permettre aux consommateurs de divers médias de mieux appréhender la qualité d'un contenu.
 
 # Description
